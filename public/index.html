@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arena de Sobrevivência</title>
+<style>
+  :root {
+    --fundo: #0b0d10; --painel: #14181d; --borda: #243038;
+    --texto: #d8dee4; --suave: #8b98a3; --verde: #3fb950;
+    --azul: #4aa3ff; --vermelho: #f85149; --amarelo: #e3b341;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; background: var(--fundo); color: var(--texto);
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+    display: flex; align-items: center; justify-content: center; padding: 16px;
+  }
+  .caixa {
+    width: 100%; max-width: 480px; background: var(--painel);
+    border: 1px solid var(--borda); border-radius: 10px; padding: 24px;
+  }
+  h1 { margin: 0 0 4px; font-size: 22px; color: var(--azul); }
+  .sub { margin: 0 0 20px; color: var(--suave); font-size: 13px; }
+  label { display: block; margin: 14px 0 6px; font-size: 13px; color: var(--suave); }
+  input {
+    width: 100%; padding: 10px 12px; font: inherit; color: var(--texto);
+    background: var(--fundo); border: 1px solid var(--borda); border-radius: 6px;
+  }
+  input:focus { outline: 2px solid var(--azul); border-color: transparent; }
+  button {
+    width: 100%; margin-top: 12px; padding: 11px; font: inherit; font-weight: bold;
+    color: #fff; background: #1f6feb; border: 0; border-radius: 6px; cursor: pointer;
+  }
+  button:hover { background: #388bfd; }
+  button.sec { background: transparent; border: 1px solid var(--borda); color: var(--suave); }
+  button.verde { background: #238636; }
+  button.verde:hover { background: #2ea043; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  .ou { text-align: center; margin: 16px 0 0; color: var(--suave); font-size: 12px; }
+  .erro { color: var(--vermelho); font-size: 13px; min-height: 18px; margin-top: 10px; }
+  .codigo { font-size: 38px; letter-spacing: 8px; text-align: center; color: var(--amarelo); margin: 8px 0 2px; }
+  .dica { text-align: center; font-size: 12px; color: var(--suave); margin: 0 0 16px; }
+  ul { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--borda); }
+  li { display: flex; justify-content: space-between; padding: 9px 4px; border-bottom: 1px solid var(--borda); }
+  .tag { font-size: 11px; color: var(--amarelo); }
+  .off { color: var(--suave); font-style: italic; }
+  .oculto { display: none; }
+  .aviso { text-align: center; padding: 20px 0; color: var(--suave); }
+</style>
+</head>
+<body>
+
+<!-- TELA 1: ENTRADA -->
+<div class="caixa" id="telaEntrada">
+  <h1>Arena de Sobrevivência</h1>
+  <p class="sub">Cada um por si. O objetivo é sobreviver.</p>
+
+  <label for="nome">Nome do seu personagem</label>
+  <input id="nome" maxlength="16" placeholder="ex.: Wabi" autocomplete="off">
+
+  <button id="btnCriar">Criar nova sala</button>
+  <p class="ou">— ou entre numa sala existente —</p>
+
+  <label for="codigo">Código da sala</label>
+  <input id="codigo" maxlength="4" placeholder="ex.: XK4P" autocomplete="off" style="text-transform:uppercase">
+  <button id="btnEntrar" class="sec">Entrar na sala</button>
+
+  <div class="erro" id="erroEntrada"></div>
+  <div class="aviso oculto" id="acordando">Acordando o mundo… pode levar até 1 minuto.</div>
+</div>
+
+<!-- TELA 2: LOBBY -->
+<div class="caixa oculto" id="telaLobby">
+  <h1>Sala de espera</h1>
+  <div class="codigo" id="lobbyCodigo">----</div>
+  <p class="dica">Mande este código para os amigos entrarem.</p>
+
+  <ul id="listaJogadores"></ul>
+  <p class="dica" id="contagem" style="margin-top:12px"></p>
+
+  <button id="btnIniciar" class="verde oculto">Iniciar partida</button>
+  <p class="dica oculto" id="aguardandoHost">Aguardando o anfitrião iniciar…</p>
+  <button id="btnSair" class="sec">Sair da sala</button>
+  <div class="erro" id="erroLobby"></div>
+</div>
+
+<!-- TELA 3: JOGO (provisória) -->
+<div class="caixa oculto" id="telaJogo">
+  <h1>A simulação começa!</h1>
+  <p class="sub">Boa sorte a todos.</p>
+  <p class="aviso">O motor do jogo (períodos, ações, combate) ainda está sendo construído.<br>
+  Por enquanto, a sala está funcionando e todo mundo conectou certinho. ✔</p>
+  <ul id="listaJogo"></ul>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  const $ = (id) => document.getElementById(id);
+  const telas = { entrada: $('telaEntrada'), lobby: $('telaLobby'), jogo: $('telaJogo') };
+
+  function mostrar(qual) {
+    for (const k in telas) telas[k].classList.toggle('oculto', k !== qual);
+  }
+  function guardar(codigo, token) {
+    try { localStorage.setItem('arena', JSON.stringify({ codigo, token })); } catch (e) {}
+  }
+  function esquecer() { try { localStorage.removeItem('arena'); } catch (e) {} }
+  function lerSalvo() {
+    try { return JSON.parse(localStorage.getItem('arena')); } catch (e) { return null; }
+  }
+  function mostrarErro(msg) {
+    $('erroEntrada').textContent = msg;
+    $('erroLobby').textContent = msg;
+  }
+
+  // ----- Botões -----
+  $('btnCriar').onclick = () => {
+    mostrarErro('');
+    socket.emit('criarSala', { nome: $('nome').value });
+  };
+  $('btnEntrar').onclick = () => {
+    mostrarErro('');
+    socket.emit('entrarSala', { codigo: $('codigo').value, nome: $('nome').value });
+  };
+  $('btnIniciar').onclick = () => socket.emit('iniciarPartida');
+  $('btnSair').onclick = () => socket.emit('sairSala');
+
+  // ----- Respostas do servidor -----
+  socket.on('sala', (s) => {
+    mostrarErro('');
+    guardar(s.codigo, s.voce.token);
+    $('acordando').classList.add('oculto');
+
+    const itens = s.jogadores.map(j =>
+      `<li><span class="${j.conectado ? '' : 'off'}">${escapar(j.nome)}${j.nome === s.voce.nome ? ' (você)' : ''}</span>` +
+      `<span class="tag">${j.host ? 'anfitrião' : (j.conectado ? '' : 'desconectado')}</span></li>`
+    ).join('');
+
+    if (s.fase === 'lobby') {
+      $('lobbyCodigo').textContent = s.codigo;
+      $('listaJogadores').innerHTML = itens;
+      $('contagem').textContent = `${s.jogadores.length} de ${s.max} jogadores`;
+      $('btnIniciar').classList.toggle('oculto', !s.voce.eHost);
+      $('aguardandoHost').classList.toggle('oculto', s.voce.eHost);
+      mostrar('lobby');
+    } else {
+      $('listaJogo').innerHTML = itens;
+      mostrar('jogo');
+    }
+  });
+
+  socket.on('erro', mostrarErro);
+  socket.on('saiu', () => { esquecer(); mostrar('entrada'); });
+  socket.on('reconexaoFalhou', () => { esquecer(); mostrar('entrada'); });
+
+  // Ao (re)conectar, tenta voltar para o personagem anterior
+  socket.on('connect', () => {
+    const salvo = lerSalvo();
+    if (salvo) socket.emit('reconectar', salvo);
+  });
+
+  // Mensagem de "acordando" se o servidor demorar a responder
+  const timerAcordar = setTimeout(() => {
+    if (!socket.connected) $('acordando').classList.remove('oculto');
+  }, 3000);
+  socket.on('connect', () => { clearTimeout(timerAcordar); $('acordando').classList.add('oculto'); });
+
+  function escapar(t) {
+    return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+</script>
+</body>
+</html>
