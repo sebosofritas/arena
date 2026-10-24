@@ -114,6 +114,82 @@
   .form .l2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
   #acordando { text-align: center; padding: 16px 0; color: var(--suave); }
   .peq { font-size: 11px; color: var(--suave); }
+
+  /* ===== jogo v0.6: tela por períodos, painéis de abrir/fechar ===== */
+  .topo { position: sticky; top: 0; z-index: 20; }
+  .topo .dia { display: flex; flex-direction: column; line-height: 1.15; }
+  .topo .dia b { font-size: 17px; color: var(--azul); } .topo .dia small { color: var(--suave); font-size: 11px; }
+  .vitais { display: flex; flex-wrap: wrap; gap: 6px; }
+  .vt { display: flex; align-items: center; gap: 5px; padding: 3px 8px 3px 6px; background: var(--painel2); border: 1px solid var(--borda); border-radius: 16px; font-size: 13px; cursor: pointer; }
+  .vt .i { font-size: 15px; } .vt b { min-width: 20px; text-align: right; }
+  .vt .mb { width: 34px; height: 5px; background: #0f1318; border-radius: 3px; overflow: hidden; } .vt .mb i { display: block; height: 100%; }
+  .vt.pv .mb i { background: var(--vermelho); } .vt.fo .mb i { background: var(--laranja); } .vt.se .mb i { background: var(--ciano); }
+  .vt.en .mb i { background: var(--amarelo); } .vt.mo .mb i { background: var(--roxo); } .vt.pa .mb i { background: var(--azul); }
+  .vt.baixo { border-color: var(--vermelho); background: #2a1515; } .vt.baixo b { color: #ffa198; }
+  .jogo-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(320px, 1fr); gap: 10px; align-items: start; }
+  @media (max-width: 900px) { .jogo-grid { grid-template-columns: minmax(0, 1fr); } }
+  .dock { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; position: sticky; top: 62px; z-index: 15; background: var(--fundo); padding: 4px 0; }
+  .dk { display: flex; flex-direction: column; align-items: center; gap: 1px; width: 62px; padding: 6px 2px 4px; background: var(--painel); border: 1px solid var(--borda); border-radius: 10px; color: var(--suave); font-size: 10px; font-weight: normal; position: relative; }
+  .dk .i { font-size: 22px; line-height: 1.1; } .dk:hover { border-color: var(--azul); color: var(--texto); background: var(--painel2); }
+  .dk.on { border-color: var(--azul); background: #12202e; color: var(--texto); }
+  .dk .bd { position: absolute; top: -4px; right: -3px; background: var(--vermelho); color: #fff; border-radius: 9px; font-size: 10px; padding: 0 5px; }
+  .cp { padding: 0; overflow: hidden; }
+  .cp > .cp-h { display: flex; align-items: center; gap: 8px; padding: 10px 12px; cursor: pointer; user-select: none; margin: 0; }
+  .cp > .cp-h .t { flex: 1; font-size: 14px; color: var(--amarelo); text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+  .cp > .cp-h .s { color: var(--suave); font-size: 12px; text-transform: none; letter-spacing: 0; font-weight: normal; margin-left: 6px; }
+  .cp > .cp-h .ch { color: var(--suave); font-size: 12px; }
+  .cp > .cp-h:hover { background: var(--painel2); }
+  .cp > .cp-b { padding: 4px 12px 12px; }
+  .cp.fechado > .cp-b { display: none; }
+  .mapa-pn { padding: 10px; }
+  /* plano do dia */
+  .passos { display: flex; flex-wrap: wrap; gap: 6px 14px; color: var(--suave); font-size: 12px; margin: 2px 0 8px; }
+  .passos b { color: var(--amarelo); }
+  .pa-linha { display: flex; align-items: center; gap: 8px; font-size: 13px; margin-bottom: 8px; }
+  .pa-linha .barra { flex: 1; height: 12px; } .pa-linha .barra i { background: var(--azul); }
+  .pers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  @media (max-width: 640px) { .pers { grid-template-columns: minmax(0, 1fr); } }
+  .per { background: var(--painel2); border: 2px solid var(--borda); border-radius: 10px; padding: 8px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; min-height: 130px; }
+  .per:hover { border-color: #3a5a80; }
+  .per.sel { border-color: var(--azul); background: #12202e; box-shadow: 0 0 0 1px var(--azul) inset; }
+  .per-h { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-weight: bold; }
+  .per-h .n { font-size: 15px; } .per-h small { color: var(--suave); font-weight: normal; font-size: 11px; }
+  .per-b { height: 7px; background: #0f1318; border-radius: 4px; overflow: hidden; } .per-b i { display: block; height: 100%; background: var(--azul); } .per-b.cheio i { background: var(--laranja); } .per-b.sono i { background: var(--roxo); }
+  .ac { display: grid; grid-template-columns: 22px minmax(0, 1fr); gap: 2px 6px; align-items: center; padding: 4px 6px; background: #0f1318; border: 1px solid #1d252c; border-radius: 7px; font-size: 12.5px; }
+  .ac .ic { font-size: 18px; text-align: center; } .ac .tx { min-width: 0; overflow-wrap: break-word; line-height: 1.25; } .ac .tx small { display: block; color: var(--suave); font-size: 11px; }
+  .ac .bt { grid-column: 1 / -1; display: flex; gap: 4px; justify-content: flex-end; }
+  .ac .bt button { padding: 0 8px; font-size: 12px; line-height: 20px; background: #21262d; border: 1px solid var(--borda); color: var(--texto); font-weight: normal; }
+  .ac.continua { border-color: var(--laranja); } .ac.adiado { opacity: .55; }
+  .per-vazio { color: var(--suave); font-size: 12px; text-align: center; padding: 10px 2px; }
+  .per-prev { color: var(--suave); font-size: 11px; display: flex; gap: 8px; flex-wrap: wrap; border-top: 1px dashed #1d252c; padding-top: 4px; margin-top: auto; }
+  .per-prev .ruim { color: #ffa198; } .per-prev .zero { color: var(--vermelho); font-weight: bold; }
+  .aviso { font-size: 12.5px; padding: 6px 8px; border-radius: 6px; margin-top: 6px; background: #2a1f10; border: 1px solid #5a4012; color: #f0c070; }
+  .aviso.ruim { background: #2a1515; border-color: #6a2424; color: #ffa198; }
+  .linha-post { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; } .linha-post select { flex: 1; }
+  /* ações */
+  .alvo-per { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 2px 0 8px; font-size: 12px; color: var(--suave); }
+  .alvo-per button { padding: 3px 9px; font-size: 12px; font-weight: normal; background: var(--painel2); border: 1px solid var(--borda); color: var(--texto); border-radius: 14px; }
+  .alvo-per button.on { border-color: var(--azul); background: #12202e; }
+  .abas { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 8px; }
+  .aba { flex: 1 1 0; min-width: 62px; display: flex; flex-direction: column; align-items: center; padding: 6px 2px; background: var(--painel2); border: 1px solid var(--borda); border-radius: 8px; font-size: 11px; color: var(--suave); font-weight: normal; }
+  .aba .i { font-size: 20px; } .aba.on { border-color: var(--verde); color: var(--texto); background: #12261a; }
+  .grade-t { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 6px; }
+  .tile { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px; padding: 6px 4px 5px; min-height: 76px; text-align: center; background: var(--painel2); border: 1px solid var(--borda); color: var(--texto); border-radius: 10px; font-weight: normal; line-height: 1.2; }
+  .tile:hover { border-color: var(--verde); background: #12261a; }
+  .tile .ti { font-size: 26px; line-height: 1.1; } .tile .tn { font-size: 12.5px; font-weight: bold; overflow-wrap: anywhere; } .tile small { color: var(--suave); font-size: 10.5px; overflow-wrap: anywhere; }
+  .tile.ruim { opacity: .65; } .tile.destaque { border-color: var(--amarelo); }
+  .sec-t { margin: 10px 0 5px; font-size: 12px; color: var(--azul); text-transform: uppercase; letter-spacing: .5px; }
+  .sec-t:first-child { margin-top: 0; }
+  .pessoa { border: 1px solid var(--borda); border-radius: 10px; padding: 8px; margin-bottom: 8px; background: var(--painel2); }
+  .pessoa > b { display: block; margin-bottom: 6px; }
+  .form-in { display: flex; gap: 6px; margin: 8px 0; flex-wrap: wrap; } .form-in > * { flex: 1 1 120px; }
+  .form-in button { flex: 0 0 auto; }
+  .vazio { color: var(--suave); font-size: 13px; padding: 8px 2px; }
+  .it { display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1px dashed #1d252c; }
+  .it:last-child { border-bottom: 0; } .it .ic { font-size: 22px; text-align: center; } .it small { display: block; color: var(--suave); font-size: 11px; }
+  .peso-barra { height: 8px; background: #0f1318; border: 1px solid var(--borda); border-radius: 4px; overflow: hidden; margin: 4px 0 8px; } .peso-barra i { display: block; height: 100%; background: var(--verde); } .peso-barra.cheia i { background: var(--laranja); }
+  .resumo-dia { background: #101c2a; border: 1px solid #1f4a78; border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; font-size: 12.5px; line-height: 1.6; color: #b9d7f5; }
+  .per-t { font-size: 12px; color: var(--amarelo); margin: 8px 0 2px; text-transform: uppercase; letter-spacing: .5px; }
 </style>
 </head>
 <body>
@@ -192,51 +268,33 @@
 <!-- JOGO -->
 <div class="oculto" id="telaJogo">
   <div class="topo">
-    <span class="rod" id="jRodada"></span>
+    <div class="dia"><b id="jRodada"></b><small id="jFase"></small></div>
     <span class="tempo" id="jTempo">--:--</span>
-    <span id="jProntos" class="dica"></span>
+    <div class="vitais" id="jVitais"></div>
     <span style="flex:1"></span>
-    <button id="btnPronto" class="verde">✔ Terminei o planejamento</button>
+    <span id="jProntos" class="dica"></span>
+    <button id="btnPronto" class="verde">✔ Pronto, passar o dia</button>
     <button id="btnSairJogo" class="sec mini">Sair</button>
   </div>
   <div id="jFaixa"></div>
-  <div class="cols">
-    <!-- coluna esquerda: você -->
-    <div>
-      <div class="pn" id="jStatus"></div>
-      <div class="pn"><h2>Mochila <span class="peq" id="jPeso"></span></h2><div id="jInv"></div></div>
-      <div class="pn"><h2>Fabricar</h2><div id="jCraft"></div></div>
-    </div>
-    <!-- centro: mundo -->
-    <div>
-      <div class="pn"><h2>Mapa do mundo <span class="peq">arraste para mover · roda do mouse ou ＋/－ para zoom · ⛶ tela cheia</span></h2><canvas id="jMapaCv" class="mundo"></canvas><p class="dica" id="jMapaDica"></p></div>
+  <div class="dock" id="jDock"></div>
+  <div class="jogo-grid">
+    <div id="colMapa">
+      <div class="pn mapa-pn"><canvas id="jMapaCv" class="mundo"></canvas><p class="dica" id="jMapaDica" style="margin:6px 0 0"></p></div>
       <div class="pn" id="jPropostas"></div>
-      <div class="pn" id="jRegiao"></div>
-      <div class="pn"><h2>Diário</h2><div class="log" id="jDiario"></div></div>
     </div>
-    <!-- direita: planejamento -->
-    <div>
-      <div class="pn" id="jPlano">
-        <h2>Seu plano para a rodada <span class="peq" id="jPA"></span></h2>
-        <div class="bar12" id="jBarra"></div>
-        <div class="rotulos"><span>Dia 1</span><span>Dia 2</span><span>Dia 3</span></div>
-        <div id="jFila" style="margin-top:8px"></div>
-        <label>Postura se alguém te encontrar</label>
-        <select id="jPostura"></select>
-        <details style="margin-top:8px" id="jAddBox"><summary>➕ Adicionar ação (completo)</summary>
-          <div class="form" id="jForm">
-            <select id="fTipo"></select>
-            <div id="fParams" class="form"></div>
-            <select id="fQuando"></select>
-            <button id="fAdd" type="button">Adicionar à fila</button>
-            <p class="dica" id="fDesc"></p>
-          </div>
-        </details>
-      </div>
-      <div class="pn"><h2>Conversa (quem estava aqui no início da rodada)</h2><div class="chat" id="chatJogo"></div>
-        <input id="chatJogoIn" maxlength="200" placeholder="Fale com quem está na região" autocomplete="off"></div>
-      <div class="pn"><h2>Notícias</h2><div class="log" id="jPublico" style="max-height:200px"></div></div>
-      <div class="pn"><h2>Sobreviventes</h2><div id="jJogadores"></div></div>
+    <div id="colLado">
+      <div class="pn cp" data-p="plano"><div class="cp-h"><span class="t">📅 Seu dia <span class="s" id="jPA"></span></span><span class="ch"></span></div><div class="cp-b" id="jPlano"><div id="pPlanoDin"></div><div class="linha-post"><span>🧭 Se alguém me encontrar:</span><select id="jPostura"></select></div></div></div>
+      <div class="pn cp" data-p="acoes"><div class="cp-h"><span class="t">⚡ Ações</span><span class="ch"></span></div><div class="cp-b" id="jAcoes"></div></div>
+      <div class="pn cp" data-p="mochila"><div class="cp-h"><span class="t">🎒 Mochila <span class="s" id="jPeso"></span></span><span class="ch"></span></div><div class="cp-b" id="jInv"></div></div>
+      <div class="pn cp" data-p="fabricar"><div class="cp-h"><span class="t">🛠️ Fabricar</span><span class="ch"></span></div><div class="cp-b" id="jCraft"></div></div>
+      <div class="pn cp" data-p="regiao"><div class="cp-h"><span class="t">📍 Onde estou</span><span class="ch"></span></div><div class="cp-b" id="jRegiao"></div></div>
+      <div class="pn cp" data-p="status"><div class="cp-h"><span class="t">❤️ Meu corpo</span><span class="ch"></span></div><div class="cp-b" id="jStatus"></div></div>
+      <div class="pn cp" data-p="diario"><div class="cp-h"><span class="t">📖 Diário</span><span class="ch"></span></div><div class="cp-b"><div class="log" id="jDiario"></div></div></div>
+      <div class="pn cp" data-p="chat"><div class="cp-h"><span class="t">💬 Conversa <span class="s">quem estava aqui no começo</span></span><span class="ch"></span></div><div class="cp-b"><div class="chat" id="chatJogo"></div>
+        <input id="chatJogoIn" maxlength="200" placeholder="Fale com quem está na região" autocomplete="off"></div></div>
+      <div class="pn cp" data-p="noticias"><div class="cp-h"><span class="t">📰 Notícias</span><span class="ch"></span></div><div class="cp-b"><div class="log" id="jPublico" style="max-height:220px"></div></div></div>
+      <div class="pn cp" data-p="vivos"><div class="cp-h"><span class="t">👥 Sobreviventes</span><span class="ch"></span></div><div class="cp-b" id="jJogadores"></div></div>
     </div>
   </div>
   <div class="erro" id="erroJogo" style="padding:0 10px"></div>
@@ -248,7 +306,7 @@
 const socket = io();
 const $ = (id) => document.getElementById(id);
 const esc = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const PERIODOS = ['manhã', 'tarde', 'noite', 'madrugada'];
+const PERIODOS = ['manhã', 'tarde', 'noite'];
 const NOMES_ATR = { FOR: 'Força', AGI: 'Agilidade', AST: 'Astúcia', CAR: 'Carisma' };
 let E = null;            // último estado recebido
 let fimEm = null;        // quando o relógio chega a zero
@@ -264,7 +322,6 @@ function guardar(codigo, token) { try { localStorage.setItem('arena', JSON.strin
 function esquecer() { try { localStorage.removeItem('arena'); } catch (e) {} }
 function lerSalvo() { try { return JSON.parse(localStorage.getItem('arena')); } catch (e) { return null; } }
 function mmss(ms) { const s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
-function rotuloTurno(t, base) { return `Dia ${base + Math.floor(t / 4)} · ${PERIODOS[Math.floor(t) % 4]}`; }
 function barra(cls, v, max) { return `<div class="barra ${cls}"><i style="width:${Math.max(0, Math.min(100, 100 * v / (max || 100)))}%"></i></div>`; }
 
 // ---------- entrada ----------
@@ -356,141 +413,270 @@ $('btnRolar').onclick = () => socket.emit('criar:rolar');
 $('btnInicioSorteio').onclick = () => socket.emit('criar:atualizar', { inicio: 'sorteio' });
 $('btnCriaPronto').onclick = () => socket.emit('criar:pronto', !E.criacao.pronto);
 
-// ---------- jogo: fila de ações ----------
+// ---------- jogo v0.6 ----------
+const PER_IC = ['☀️', '🌤️', '🌙'], PER_NOME = ['Manhã', 'Tarde', 'Noite'];
+const IC = { mover: '🚶', ir: '🚪', observar: '🔭', vasculhar: '🔍', vasculhar_fundo: '🔎', esconder: '🫥', rastrear: '👣', pescar: '🎣', cacar: '🏹', coletar_agua: '🚰', purificar: '💧', fogueira: '🔥', cozinhar: '🍳', fabricar: '🛠️', armar_armadilha: '🪤', recolher: '🧺', construir_abrigo: '⛺', barricar: '🚧', arrombar: '🔨', comer: '🍽️', beber: '🥤', usar: '💊', equipar: '🧥', largar: '📥', pegar_chao: '📤', tratar: '🩹', descansar: '🛌', dormir: '😴', esperar: '⏳', falar: '💬', dar: '🎁', furtar: '🕵️', propor: '🤝', romper: '✂️', atacar: '⚔️', emboscar: '🗡️', escapar: '✨' };
+const CURTO = { mover: 'Ir', ir: 'Entrar', observar: 'Observar', vasculhar: 'Vasculhar', vasculhar_fundo: 'A fundo', esconder: 'Esconder-se', rastrear: 'Rastrear', pescar: 'Pescar', cacar: 'Caçar', coletar_agua: 'Pegar água', purificar: 'Purificar água', fogueira: 'Fogueira', cozinhar: 'Cozinhar', fabricar: 'Fabricar', armar_armadilha: 'Armar armadilha', recolher: 'Recolher presas', construir_abrigo: 'Abrigo', barricar: 'Barricar', arrombar: 'Arrombar', comer: 'Comer', beber: 'Beber', usar: 'Usar', equipar: 'Equipar', largar: 'Largar', pegar_chao: 'Pegar', tratar: 'Tratar feridas', descansar: 'Descansar', dormir: 'Dormir', esperar: 'Esperar', falar: 'Falar', dar: 'Dar', furtar: 'Furtar', propor: 'Propor', romper: 'Romper acordo', atacar: 'Atacar', emboscar: 'Emboscar', escapar: 'Atravessar' };
+const SETA = { norte: '⬆️', sul: '⬇️', leste: '➡️', oeste: '⬅️' };
+const PAINEIS = [['plano', '📅', 'Meu dia'], ['acoes', '⚡', 'Ações'], ['mochila', '🎒', 'Mochila'], ['fabricar', '🛠️', 'Fabricar'], ['regiao', '📍', 'Onde estou'], ['status', '❤️', 'Meu corpo'], ['diario', '📖', 'Diário'], ['chat', '💬', 'Conversa'], ['noticias', '📰', 'Notícias'], ['vivos', '👥', 'Vivos']];
+const UI = { per: 0, aba: 'explorar', auto: false, form: null, tiles: [], rodada: -1 };
+let abertos = { plano: true, acoes: true, regiao: true, diario: true };
+try { const s = JSON.parse(localStorage.getItem('arena_paineis')); if (s && typeof s === 'object') abertos = s; } catch (e) {}
+function salvarPaineis() { try { localStorage.setItem('arena_paineis', JSON.stringify(abertos)); } catch (e) {} }
+function aplicarPaineis() {
+  document.querySelectorAll('#telaJogo .cp').forEach(el => { const k = el.dataset.p, on = !!abertos[k]; el.classList.toggle('fechado', !on); el.querySelector('.ch').textContent = on ? '▾ fechar' : '▸ abrir'; });
+  document.querySelectorAll('#jDock .dk').forEach(b => b.classList.toggle('on', !!abertos[b.dataset.p]));
+}
+$('jDock').innerHTML = PAINEIS.map(([k, ic, nm]) => `<button class="dk" data-p="${k}" title="${nm}"><span class="i">${ic}</span>${nm}</button>`).join('');
+$('jDock').querySelectorAll('.dk').forEach(b => b.onclick = () => { const k = b.dataset.p; abertos[k] = !abertos[k]; salvarPaineis(); aplicarPaineis(); if (abertos[k]) document.querySelector(`#telaJogo .cp[data-p=${k}]`).scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+document.querySelectorAll('#telaJogo .cp > .cp-h').forEach(h => h.onclick = () => { const k = h.parentElement.dataset.p; abertos[k] = !abertos[k]; salvarPaineis(); aplicarPaineis(); });
+aplicarPaineis();
+
 function J() { return E.jogo; }
-function novaFila(f) { socket.emit('fila', { fila: f, postura: $('jPostura').value }); }
-function limpaAcao(a) { const o = {}; for (const k of ['tipo', 'dir', 'local', 'alvo', 'item', 'qtd', 'texto', 'turnos', 'quando', 'restante']) if (a[k] != null) o[k] = a[k]; const ac = a.acordo || a.tipoAcordo; if (ac) o.acordo = ac; return o; }
+function pintar(el, html, bind) { if (el._h === html) return false; el.innerHTML = html; el._h = html; if (bind) bind(el); return true; }
+function limpaAcao(a) { const o = {}; for (const k of ['tipo', 'dir', 'local', 'alvo', 'item', 'qtd', 'texto', 'turnos', 'quando', 'restante', 'receita']) if (a[k] != null) o[k] = a[k]; const ac = a.acordo || a.tipoAcordo; if (ac) o.acordo = ac; return o; }
 function enviarAcoes(fila) { socket.emit('fila', { fila: fila.map(limpaAcao), postura: $('jPostura').value }); }
 function addAcao(a) {
-  if (J().pronto) return mostrarErro('Desmarque "terminei o planejamento" para editar.');
+  if (J().pronto) return mostrarErro('Você já marcou "Pronto". Clique em "Voltar a editar" para mudar o plano.');
+  mostrarErro('');
+  if (a.quando == null) a.quando = UI.per;
+  UI.auto = true;
   enviarAcoes(J().fila.concat([a]));
 }
 function remAcao(i) { const f = J().fila.slice(); f.splice(i, 1); enviarAcoes(f); }
-function moveAcao(i, d) { const f = J().fila.slice(); const j = i + d; if (j < 0 || j >= f.length) return; [f[i], f[j]] = [f[j], f[i]]; enviarAcoes(f); }
+function moverPer(i, d) { const f = J().fila.map(x => Object.assign({}, x)), p = J().previa[i]; const k = Math.max(0, Math.min(2, Math.floor((p ? p.inicio : 0) + 1e-6) + d)); f[i].quando = k; enviarAcoes(f); }
 $('jPostura').onchange = () => socket.emit('postura', $('jPostura').value);
 $('btnPronto').onclick = () => socket.emit('pronto', !J().pronto);
-$('btnPronto').dataset.x = '';
 
-function descAcao(a) {
-  const cat = J().catalogo[a.tipo] || { nome: a.tipo };
-  const v = J(); const nomeJog = (id) => (v.jogadores.find(x => x.id === id) || {}).nome || '?';
-  const nomeItem = (id) => { const i = v.inventario.find(x => x.id === id) || v.regiao.chao.find(x => x.id === id); return i ? i.nome : id; };
-  let t = cat.nome;
-  if (a.dir) t += ' → ' + a.dir;
-  if (a.local) { const l = v.regiao.locais.find(x => x.id === a.local); t += ' (' + (l ? l.nome : 'local') + ')'; }
-  if (a.alvo) t += ' · ' + nomeJog(a.alvo);
-  if (a.item) t += ' · ' + nomeItem(a.item) + (a.qtd > 1 ? ' x' + a.qtd : '');
-  if (a.tipoAcordo) t = (a.tipoAcordo === 'alianca' ? 'Propor ALIANÇA' : 'Propor TRÉGUA') + ' · ' + nomeJog(a.alvo);
-  if (a.receita) { const r = v.receitas.find(x => x.id === a.receita); t += ' · ' + (r ? r.nome : a.receita); }
-  if (a.texto) t += ': “' + a.texto + '”';
-  if (a.turnos) t += ' (' + a.turnos + ' período' + (a.turnos > 1 ? 's' : '') + ')';
-  return t;
+// ---------- nomes curtos das ações da fila ----------
+function rotulo(a) {
+  const v = J(), nomeJog = (id) => (v.jogadores.find(x => x.id === id) || {}).nome || '?';
+  const item = (id) => v.inventario.find(x => x.id === id) || v.regiao.chao.find(x => x.id === id) || null;
+  const lc = (id) => { const l = v.regiao.locais.find(x => x.id === id); return l ? l.nome : ''; };
+  let ic = IC[a.tipo] || '▫️', tx = CURTO[a.tipo] || a.tipo, sub = '';
+  const it = a.item ? item(a.item) : null;
+  if (a.tipo === 'mover') { ic = SETA[a.dir] || ic; tx = 'Ir para o ' + a.dir; const n = v.regiao.vizinhas[a.dir]; sub = n ? n.nome : ''; }
+  else if (a.local) sub = lc(a.local);
+  if (it && it.icone && ['comer', 'beber', 'usar', 'equipar', 'cozinhar', 'largar', 'dar', 'pegar_chao'].includes(a.tipo)) ic = it.icone;
+  if (a.item) sub = (it ? it.nome : a.item) + (a.qtd > 1 ? ' x' + a.qtd : '');
+  if (a.alvo) sub = nomeJog(a.alvo) + (a.item ? ' · ' + sub : '');
+  if (a.tipoAcordo) { tx = a.tipoAcordo === 'alianca' ? 'Propor aliança' : 'Propor trégua'; }
+  if (a.receita) { const r = v.receitas.find(x => x.id === a.receita); sub = r ? r.nome : a.receita; }
+  if (a.texto) sub = '“' + a.texto + '”';
+  if (a.tipo === 'dormir') sub = a.turnos > 1 ? a.turnos + ' períodos' : 'o período todo';
+  if (a.tipo === 'esperar') sub = (a.turnos || 1) + ' período' + (a.turnos > 1 ? 's' : '');
+  return { ic, tx, sub };
 }
 
-function renderFila() {
-  const v = J(), base = v.diaInicio, dead = !v.voce.vivo || v.voce.escapou;
-  $('jPA').textContent = `PA: ${v.usado.toFixed(1).replace('.0', '')}/${v.voce.pa}${v.voce.pa < v.voce.paBase ? ' (reduzido de ' + v.voce.paBase + ')' : ''}`;
-  $('jBarra').innerHTML = v.fila.map((a, i) => { const p = v.previa[i]; if (!p || p.inicio >= 12) return '';
-    const w = Math.max(1.5, 100 * (Math.min(12, p.fim) - p.inicio) / 12);
-    return `<div class="seg ${p.estado}" style="left:${100 * p.inicio / 12}%;width:${w}%" title="${esc(descAcao(a))}">${i + 1}</div>`; }).join('');
-  $('jFila').innerHTML = v.fila.length ? v.fila.map((a, i) => { const p = v.previa[i] || {};
-    const qd = p.estado === 'adiado' ? 'não cabe — fica para a próxima rodada' : p.estado === 'continua' ? 'termina na próxima rodada' : rotuloTurno(p.inicio, base);
-    return `<div class="acao ${p.estado || ''}"><span class="c">${i + 1}</span><div><div>${esc(descAcao(a))}${a.carregada ? ' <span class="tag">(sobrou da rodada anterior)</span>' : ''}</div><div class="peq">${esc(qd)} · custo ${p.custo != null ? p.custo : '?'} PA${a.quando != null ? ' · marcada para ' + rotuloTurno(a.quando, base) : ''}</div></div>
-      <div class="btns">${dead ? '' : `<button class="mini" data-m="${i}" data-d="-1">↑</button><button class="mini" data-m="${i}" data-d="1">↓</button><button class="mini" data-r="${i}">✕</button>`}</div></div>`; }).join('')
-    : '<p class="dica">Nada planejado ainda. Use os botões nos cards ao lado, ou "Adicionar ação". Você pode deixar tempo livre.</p>';
-  $('jFila').querySelectorAll('[data-r]').forEach(b => b.onclick = () => remAcao(Number(b.dataset.r)));
-  $('jFila').querySelectorAll('[data-m]').forEach(b => b.onclick = () => moveAcao(Number(b.dataset.m), Number(b.dataset.d)));
-  // avisos de fome/sede ao enviar
-  const av = [];
-  const consome = (campo) => v.fila.some(a => (a.tipo === 'comer' && campo === 'fome') || (a.tipo === 'beber' && campo === 'sede') || (a.tipo === 'coletar_agua' && campo === 'sede'));
-  if (v.voce.vivo && !v.voce.escapou) {
-    if (!consome('sede') && v.voce.sede < 100) av.push('⚠️ Você não planejou beber nada: vai passar sede nesta rodada.');
-    if (!consome('fome')) av.push('⚠️ Você não planejou comer: vai passar fome nesta rodada.');
-    if (!v.fila.some(a => a.tipo === 'dormir' || a.tipo === 'descansar') && v.voce.energia < 70) av.push('⚠️ Você não planejou dormir: o cansaço vai pesar.');
+// ---------- previsão de fome/sede/energia ao longo do dia ----------
+function simular() {
+  const v = J(), me = v.voce, tx = v.taxas || { fome: 25, sede: 34, energia: 21 };
+  let f = me.fome, s = me.sede, e = me.energia;
+  const out = [], avisos = [], dorm = [false, false, false], evs = [[], [], []];
+  v.fila.forEach((a, i) => { const p = v.previa[i]; if (!p || p.estado === 'adiado' || p.inicio >= 3) return; evs[Math.min(2, Math.floor(p.inicio + 1e-6))].push(a);
+    if (a.tipo === 'dormir') for (let q = Math.floor(p.inicio + 1e-6); q < Math.min(3, Math.ceil(p.fim - 1e-6)); q++) dorm[q] = true; });
+  const zero = { fome: -1, sede: -1, energia: -1 };
+  for (let k = 0; k < 3; k++) {
+    for (const a of evs[k]) {
+      const it = a.item ? v.inventario.find(x => x.id === a.item) : null;
+      if (['comer', 'beber', 'usar'].includes(a.tipo) && it && it.uso) {
+        for (const [c, nome, ref] of [['fome', 'fome', 'f'], ['sede', 'sede', 's'], ['energia', 'energia', 'e']]) {
+          const g = it.uso[c]; if (!g) continue;
+          const atual = ref === 'f' ? f : ref === 's' ? s : e, real = Math.min(g, 100 - atual);
+          if (real < g * 0.5) avisos.push({ k, ruim: false, t: `${IC[a.tipo]} ${CURTO[a.tipo]} ${it.nome} ${PER_NOME[k] === 'Noite' ? 'à noite' : 'de ' + PER_NOME[k].toLowerCase()} quase não adianta: sua ${nome} já está em ${Math.round(atual)}. Deixe para mais tarde.` });
+          if (ref === 'f') f += real; else if (ref === 's') s += real; else e += real;
+        }
+      }
+      if (a.tipo === 'coletar_agua' && v.disp && v.disp.aguaTipo === 'torneira') s = Math.min(100, s + 45);
+      if (a.tipo === 'descansar') e = Math.min(100, e + 30);
+    }
+    f = Math.max(0, f - tx.fome / 3 * (dorm[k] ? 0.5 : 1)); s = Math.max(0, s - tx.sede / 3 * (dorm[k] ? 0.6 : 1));
+    e = dorm[k] ? Math.min(100, e + 28) : Math.max(0, e - tx.energia / 3);
+    for (const [c, val] of [['fome', f], ['sede', s], ['energia', e]]) if (val <= 0 && zero[c] < 0) zero[c] = k;
+    out.push({ f: Math.round(f), s: Math.round(s), e: Math.round(e) });
   }
-  $('jFila').insertAdjacentHTML('beforeend', av.map(x => `<p class="peq" style="color:var(--laranja)">${x}</p>`).join(''));
+  const fim = out[2];
+  if (zero.sede >= 0) avisos.push({ k: 9, ruim: true, t: `💧 Sua sede chega a ZERO ${zero.sede === 2 ? 'na noite' : zero.sede === 1 ? 'à tarde' : 'de manhã'} e você perde vida. Planeje beber (ou pegar água).` });
+  else if (fim.s < 30) avisos.push({ k: 9, ruim: false, t: `💧 Sua sede vai ficar em ${fim.s} no fim do dia. Planeje beber.` });
+  if (zero.fome >= 0) avisos.push({ k: 9, ruim: true, t: `🍖 Sua fome chega a ZERO ${zero.fome === 2 ? 'na noite' : zero.fome === 1 ? 'à tarde' : 'de manhã'}. Planeje comer.` });
+  else if (fim.f < 30) avisos.push({ k: 9, ruim: false, t: `🍖 Sua fome vai ficar em ${fim.f} no fim do dia. Planeje comer.` });
+  if (zero.energia >= 0) avisos.push({ k: 9, ruim: true, t: '⚡ Você vai chegar à exaustão. Planeje dormir.' });
+  else if (fim.e < 30 && !dorm.some(x => x)) avisos.push({ k: 9, ruim: false, t: `⚡ Sua energia vai ficar em ${fim.e}. Planeje dormir (à noite é o melhor).` });
+  return { out, avisos };
 }
 
-// ---------- jogo: formulário completo ----------
-const PARAMS_HTML = {
-  dir: () => `<select data-p="dir"><option value="norte">Norte</option><option value="sul">Sul</option><option value="leste">Leste</option><option value="oeste">Oeste</option></select>`,
-  local: (opt) => `<select data-p="local">${opt ? '<option value="">(qualquer local)</option>' : ''}${J().regiao.locais.map(l => `<option value="${esc(l.id)}">${esc(l.nome)}</option>`).join('')}</select>`,
-  alvo: () => { const l = (J().jogadores).filter(x => x.id !== J().voce.id && x.estado === 'vivo'); return `<select data-p="alvo">${l.map(x => `<option value="${x.id}">${esc(x.nome)}</option>`).join('')}</select>`; },
-  item: (t) => { const lista = itensPara(t); return `<select data-p="item">${lista.map(i => `<option value="${esc(i.id)}">${esc(i.nome)}${i.qtd ? ' x' + i.qtd : ''}</option>`).join('')}</select>`; },
-  qtd: () => `<input data-p="qtd" type="number" min="1" max="99" value="1" placeholder="quantidade">`,
-  texto: () => `<input data-p="texto" maxlength="140" placeholder="O que dizer? (até 140 letras)">`,
-  receita: () => `<select data-p="receita">${J().receitas.map(r => `<option value="${r.id}">${esc(r.nome)} (${esc(r.ing)})</option>`).join('')}</select>`,
-  turnos: () => `<select data-p="turnos">${[1, 2, 3, 4, 5, 6, 8, 12].map(n => `<option value="${n}">${n} período${n > 1 ? 's' : ''}</option>`).join('')}</select>`,
-  acordo: () => `<select data-p="acordo"><option value="tregua">Trégua (5 PA)</option><option value="alianca">Aliança (6 PA)</option></select>`,
-};
-function itensPara(t) {
-  const inv = J().inventario;
-  if (t === 'comer') return inv.filter(i => i.uso && i.uso.fome > 0);
-  if (t === 'beber') return inv.filter(i => i.uso && i.uso.sede > 0);
-  if (t === 'usar') return inv.filter(i => i.uso);
-  if (t === 'equipar') return inv.filter(i => i.slot || i.dano);
-  if (t === 'cozinhar') return inv.filter(i => i.cozinha);
-  if (t === 'armar_armadilha') return inv.filter(i => i.tags.includes('armadilha'));
-  if (t === 'pegar_chao') return J().regiao.chao;
-  return inv;
-}
-let formTipo = null, formSig = '';
-function renderForm() {
-  const v = J(), cat = v.catalogo;
-  const dead = !v.voce.vivo || v.voce.escapou;
-  $('jAddBox').classList.toggle('oculto', dead);
-  const tipos = Object.keys(cat).filter(k => !cat[k].oculta || (k === 'escapar' && v.voce.podeEscapar));
-  const sig = tipos.join() + '|' + v.voce.podeEscapar;
-  if ($('fTipo').dataset.sig !== sig) {
-    const grupos = {};
-    for (const k of tipos) (grupos[cat[k].grupo] = grupos[cat[k].grupo] || []).push(k);
-    $('fTipo').innerHTML = Object.keys(grupos).map(g => `<optgroup label="${esc(g)}">${grupos[g].map(k => `<option value="${k}">${esc(k === 'escapar' ? '✨ Atravessar' : cat[k].nome)} (${k === 'propor' ? '5-6' : cat[k].custo} PA)</option>`).join('')}</optgroup>`).join('');
-    $('fTipo').dataset.sig = sig;
-    $('fQuando').innerHTML = '<option value="">Quando der (na ordem)</option>' + [0, 1, 2].map(d => PERIODOS.map((p, i) => `<option value="${d * 4 + i}">Dia ${d + 1} · ${p}</option>`).join('')).join('');
-  }
-  const tipo = $('fTipo').value;
-  const novaSig = tipo + '|' + v.regiao.id + '|' + v.receitas.length + '|' + v.inventario.length + '|' + v.regiao.chao.length + '|' + v.jogadores.length;
-  if (novaSig !== formSig) {
-    formSig = novaSig;
-    const guardado = {}; $('fParams').querySelectorAll('[data-p]').forEach(el => guardado[el.dataset.p] = el.value);
-    const ps = (cat[tipo] || { p: [] }).p;
-    $('fParams').innerHTML = ps.map(p => { const opt = p.endsWith('?'), k = p.replace('?', ''); return PARAMS_HTML[k] ? PARAMS_HTML[k](k === 'item' ? tipo : opt) : ''; }).join('');
-    $('fParams').querySelectorAll('[data-p]').forEach(el => { if (guardado[el.dataset.p] != null && [...(el.options || [])].some(o => o.value === guardado[el.dataset.p]) || (el.tagName === 'INPUT' && guardado[el.dataset.p])) el.value = guardado[el.dataset.p]; });
-    $('fDesc').textContent = (cat[tipo] || {}).desc || '';
-  }
-}
-$('fTipo').onchange = () => { formSig = ''; renderForm(); };
-$('fAdd').onclick = () => {
-  const tipo = $('fTipo').value, a = { tipo };
-  $('fParams').querySelectorAll('[data-p]').forEach(el => { if (el.value !== '') a[el.dataset.p] = el.tagName === 'INPUT' && el.type === 'number' ? Number(el.value) : el.value; });
-  if ($('fQuando').value !== '') a.quando = Number($('fQuando').value);
-  if (a.turnos) a.turnos = Number(a.turnos);
-  addAcao(a);
-  const t = $('fParams').querySelector('input[data-p=texto]'); if (t) t.value = '';
-};
-function preencher(tipo, params) {
-  $('jAddBox').open = true; $('fTipo').value = tipo; formSig = ''; renderForm();
-  for (const k in params) { const el = $('fParams').querySelector(`[data-p=${k}]`); if (el) el.value = params[k]; }
-  const f = $('fParams').querySelector('input[data-p=texto]'); if (f) f.focus();
-  $('jAddBox').scrollIntoView({ block: 'nearest' });
+// ---------- plano do dia ----------
+function renderPlano() {
+  const v = J(), me = v.voce, dead = !me.vivo || me.escapou, cap = me.pa / 3;
+  document.querySelector('#telaJogo .cp[data-p=plano]').classList.toggle('oculto', v.fim);
+  $('jPA').textContent = `${v.usado.toFixed(1).replace('.0', '')}/${me.pa} PA`;
+  const per = [[], [], []], adiadas = [], uso = [0, 0, 0], sono = [false, false, false];
+  v.fila.forEach((a, i) => {
+    const p = v.previa[i]; if (!p) return;
+    if (p.estado === 'adiado' || p.inicio >= 3) { adiadas.push([a, i]); return; }
+    per[Math.min(2, Math.floor(p.inicio + 1e-6))].push([a, i, p]);
+    const dur = p.fim - p.inicio;
+    if (a.tipo === 'dormir') { for (let q = Math.floor(p.inicio + 1e-6); q < Math.min(3, Math.ceil(p.fim - 1e-6)); q++) sono[q] = true; }
+    else if (dur > 0 && p.custo > 0) for (let q = 0; q < 3; q++) uso[q] += p.custo * Math.max(0, Math.min(p.fim, q + 1) - Math.max(p.inicio, q)) / dur;
+  });
+  if (UI.auto) { UI.auto = false; if (uso[UI.per] >= cap - 0.3 && UI.per < 2) UI.per++; }
+  const sim = simular();
+  const passos = !v.fila.length && !dead ? `<div class="passos"><span><b>1.</b> Escolha o período (☀️ 🌤️ 🌙)</span><span><b>2.</b> Toque nas ações em ⚡ Ações</span><span><b>3.</b> Aperte ✔ Pronto</span></div>` : '';
+  const pct = Math.min(100, 100 * v.usado / Math.max(1, me.pa));
+  const cards = [0, 1, 2].map(k => {
+    const l = per[k].map(([a, i, p]) => { const r = rotulo(a);
+      return `<div class="ac ${p.estado}"><span class="ic">${r.ic}</span><span class="tx">${esc(r.tx)}${r.sub ? '<small>' + esc(r.sub) + '</small>' : ''}${p.estado === 'continua' ? '<small>termina amanhã</small>' : ''}${a.carregada ? '<small>sobrou de ontem</small>' : ''}</span>
+        <span class="bt">${dead ? '' : `${k > 0 ? `<button data-mp="${i}" data-d="-1" title="Mover para o período anterior">◀</button>` : ''}${k < 2 ? `<button data-mp="${i}" data-d="1" title="Mover para o próximo período">▶</button>` : ''}<button data-r="${i}" title="Tirar">✕</button>`}</span></div>`; }).join('');
+    const pv = sim.out[k];
+    const cls = (x) => x <= 0 ? 'zero' : x < 25 ? 'ruim' : '';
+    return `<div class="per ${UI.per === k ? 'sel' : ''}" data-per="${k}">
+      <div class="per-h"><span class="n">${PER_IC[k]} ${PER_NOME[k]}</span><small>${sono[k] ? '💤 dormindo' : uso[k].toFixed(1).replace('.0', '') + '/' + cap.toFixed(1).replace('.0', '') + ' PA'}</small></div>
+      <div class="per-b ${sono[k] ? 'sono' : uso[k] >= cap - 0.05 ? 'cheio' : ''}"><i style="width:${sono[k] ? 100 : Math.min(100, 100 * uso[k] / cap)}%"></i></div>
+      ${l || `<div class="per-vazio">${UI.per === k && !dead ? 'Escolha ações em ⚡ Ações' : 'livre'}</div>`}
+      <div class="per-prev" title="Previsão ao fim deste período"><span>🍖 <span class="${cls(pv.f)}">${pv.f}</span></span><span>💧 <span class="${cls(pv.s)}">${pv.s}</span></span><span>⚡ <span class="${cls(pv.e)}">${pv.e}</span></span></div></div>`; }).join('');
+  const ad = adiadas.length ? `<div class="aviso">⏳ Não coube neste dia (fica para amanhã se for possível):<br>${adiadas.map(([a, i]) => { const r = rotulo(a); return `${r.ic} ${esc(r.tx)}${r.sub ? ' · ' + esc(r.sub) : ''} <button class="mini" data-r="${i}">✕</button>`; }).join('<br>')}</div>` : '';
+  const av = dead ? '' : sim.avisos.map(x => `<div class="aviso ${x.ruim ? 'ruim' : ''}">${esc(x.t)}</div>`).join('');
+  const html = passos + `<div class="pa-linha"><span>🎯 Pontos de ação</span><div class="barra"><i style="width:${pct}%"></i></div><b>${v.usado.toFixed(1).replace('.0', '')}/${me.pa}</b></div>${me.pa < me.paBase ? `<div class="peq">Reduzido de ${me.paBase}: fome, dor, cansaço ou frio atrapalham.</div>` : ''}<div class="pers">${cards}</div>${ad}${av}`;
+  pintar($('pPlanoDin'), html, (el) => {
+    el.querySelectorAll('[data-per]').forEach(c => c.onclick = (ev) => { if (ev.target.closest('button')) return; UI.per = Number(c.dataset.per); renderPlano(); renderAcoes(); });
+    el.querySelectorAll('[data-r]').forEach(b => b.onclick = () => remAcao(Number(b.dataset.r)));
+    el.querySelectorAll('[data-mp]').forEach(b => b.onclick = () => moverPer(Number(b.dataset.mp), Number(b.dataset.d)));
+  });
 }
 
-// ---------- jogo: painéis ----------
+// ---------- ações (tudo que dá para fazer, numa aba só) ----------
+function temAbridor() { return J().inventario.some(i => ['abridor_lata', 'faca_cozinha', 'faca_caca', 'canivete', 'facao'].includes(i.id)); }
+function secoesAcoes(aba) {
+  const v = J(), me = v.voce, cat = v.catalogo, d = v.disp || {}, S = [];
+  const pa = (t) => (t === 'propor' ? '5-6' : cat[t].custo) + ' PA';
+  const T = (tipo, o) => Object.assign({ ic: IC[tipo], tn: CURTO[tipo], sub: pa(tipo), a: { tipo } }, o || {});
+  if (aba === 'explorar') {
+    const t = [T('observar'), T('esconder')];
+    if (v.jogadores.some(x => x.id !== me.id && x.estado === 'vivo')) t.push(T('rastrear', { a: null, form: 'rastrear' }));
+    if (d.recolher) t.push(T('recolher', { destaque: true }));
+    if (me.podeEscapar) t.push(T('escapar', { destaque: true }));
+    S.push({ t: 'Ao redor', tiles: t });
+    for (const c of v.regiao.chao) S.push(null) || S.pop();
+    if (v.regiao.chao.length) S.push({ t: 'No chão', tiles: v.regiao.chao.map(c => ({ ic: '📤', tn: c.nome + (c.qtd > 1 ? ' x' + c.qtd : ''), sub: 'Pegar · 0.25 PA', a: { tipo: 'pegar_chao', item: c.id } })) });
+    for (const l of v.regiao.locais) {
+      const sub = `${l.cmdVasculhados}/${l.cmdTotal} cômodos`;
+      const tiles = l.trancado ? [T('arrombar', { sub: '🔒 trancado · 2 PA', a: { tipo: 'arrombar', local: l.id }, destaque: true })]
+        : [T('vasculhar', { sub: sub + ' · 1 PA', a: { tipo: 'vasculhar', local: l.id }, ruim: l.cmdVasculhados >= l.cmdTotal }), T('vasculhar_fundo', { sub: '2 PA', a: { tipo: 'vasculhar_fundo', local: l.id } }), T('ir', { sub: '0.25 PA', a: { tipo: 'ir', local: l.id } })];
+      S.push({ t: `${l.icone} ${l.nome}${v.voce.local === l.id ? ' (você está aqui)' : ''}`, tiles });
+    }
+    if (!v.regiao.locais.length) S.push({ t: 'Locais', vazio: 'Só terreno aberto: não há construções aqui.' });
+  } else if (aba === 'ir') {
+    const t = Object.keys(v.regiao.vizinhas).map(dir => { const n = v.regiao.vizinhas[dir]; return { ic: SETA[dir], tn: dir[0].toUpperCase() + dir.slice(1), sub: `${n.icone} ${n.nome}${n.neblina ? ' 🌫️' : ''} · 0.5 PA`, a: { tipo: 'mover', dir }, ruim: n.neblina }; });
+    S.push({ t: 'Para onde?', tiles: t, nota: 'Dica: você também pode clicar numa região vizinha (borda azul) no mapa.' });
+  } else if (aba === 'sobreviver') {
+    const t = [];
+    if (d.agua) t.push(T('coletar_agua', { sub: d.aguaTipo === 'torneira' ? 'torneira · 1 PA' : 'lago (suja) · 1 PA' }));
+    if (d.purificar) t.push(T('purificar'));
+    if (d.pescar) t.push(T('pescar'));
+    if (d.cacar) t.push(T('cacar'));
+    if (d.fogueira) t.push(T('fogueira'));
+    if (d.abrigo) t.push(T('construir_abrigo'));
+    if (d.barricar) t.push(T('barricar'));
+    if (d.tratar) t.push(T('tratar', { destaque: me.pv < me.pvMax * 0.7 || me.sangramento > 0 || me.infeccao > 0 || me.ferida.perna === 2 || me.ferida.braco === 2 }));
+    S.push({ t: 'Sobrevivência', tiles: t, vazio: 'Nada disponível agora. Vasculhe lugares para achar garrafas, isqueiro, lenha, remédios…' });
+    const cz = d.cozinhar ? v.inventario.filter(i => i.cozinha).map(i => ({ ic: '🍳', tn: 'Cozinhar ' + i.nome, sub: '1.5 PA', a: { tipo: 'cozinhar', item: i.id } })) : [];
+    if (cz.length) S.push({ t: 'Cozinhar', tiles: cz });
+    const ar = v.inventario.filter(i => i.tags.includes('armadilha')).map(i => ({ ic: '🪤', tn: 'Armar ' + i.nome, sub: '4 PA', a: { tipo: 'armar_armadilha', item: i.id } }));
+    if (ar.length) S.push({ t: 'Armadilhas', tiles: ar });
+  } else if (aba === 'itens') {
+    const inv = v.inventario, ab = temAbridor();
+    const comer = inv.filter(i => i.uso && i.uso.fome > 0 && (!i.req || ab)), beber = inv.filter(i => i.uso && !(i.uso.fome > 0) && i.uso.sede > 0);
+    const rem = inv.filter(i => i.uso && !(i.uso.fome > 0) && !(i.uso.sede > 0)), equ = inv.filter(i => (i.slot || i.dano) && !i.equipado);
+    const info = (i, c) => `+${i.uso[c]} ${c} · 0.5 PA${i.risco ? ' · risco' : ''}`;
+    S.push({ t: '🍽️ Comer', tiles: comer.map(i => ({ ic: i.icone, tn: i.nome + (i.qtd > 1 ? ' x' + i.qtd : ''), sub: info(i, 'fome'), a: { tipo: 'comer', item: i.id }, ruim: me.fome > 90, destaque: me.fome < 45 })), vazio: 'Nada para comer na mochila.' });
+    S.push({ t: '🥤 Beber', tiles: beber.map(i => ({ ic: i.icone, tn: i.nome + (i.qtd > 1 ? ' x' + i.qtd : ''), sub: info(i, 'sede'), a: { tipo: 'beber', item: i.id }, ruim: me.sede > 90, destaque: me.sede < 45 })), vazio: 'Nada para beber na mochila.' });
+    if (rem.length) S.push({ t: '💊 Remédios e outros', tiles: rem.map(i => ({ ic: i.icone, tn: i.nome + (i.qtd > 1 ? ' x' + i.qtd : ''), sub: (resumoUso(i) || 'usar') + ' · 1 PA', a: { tipo: 'usar', item: i.id } })) });
+    if (equ.length) S.push({ t: '🧥 Equipar', tiles: equ.map(i => ({ ic: i.icone, tn: i.nome, sub: (i.dano ? 'dano ' + i.dano[0] + '-' + i.dano[1] + ' · ' : '') + '0.25 PA', a: { tipo: 'equipar', item: i.id } })) });
+    if (inv.length) S.push({ t: '📥 Largar no chão', det: true, tiles: inv.map(i => ({ ic: i.icone, tn: i.nome, sub: 'x' + i.qtd + ' · 0.25 PA', a: { tipo: 'largar', item: i.id, qtd: 1 } })) });
+  } else if (aba === 'pessoas') {
+    if (!v.presentes.length) S.push({ t: 'Quem está aqui', vazio: 'Ninguém à vista agora. Alguém pode aparecer durante o dia.' });
+    for (const o of v.presentes) {
+      const amigo = o.aliado || o.tregua;
+      const t = [{ ic: '💬', tn: 'Falar', sub: '0.5 PA', form: 'falar', alvo: o.id }, { ic: '🎁', tn: 'Dar item', sub: '0.5 PA', form: 'dar', alvo: o.id }];
+      if (!o.tregua && !o.aliado) t.push({ ic: '🕊️', tn: 'Trégua', sub: '5 PA', a: { tipo: 'propor', alvo: o.id, tipoAcordo: 'tregua' } });
+      if (!o.aliado) t.push({ ic: '🤝', tn: 'Aliança', sub: '6 PA', a: { tipo: 'propor', alvo: o.id, tipoAcordo: 'alianca' } });
+      if (amigo) t.push({ ic: '✂️', tn: 'Romper acordo', sub: '0.5 PA', a: { tipo: 'romper', alvo: o.id } });
+      t.push({ ic: '🕵️', tn: 'Furtar', sub: '3 PA', a: { tipo: 'furtar', alvo: o.id } });
+      t.push({ ic: '⚔️', tn: amigo ? 'Atacar (traição!)' : 'Atacar', sub: '5 PA', a: { tipo: 'atacar', alvo: o.id }, ruim: true, confirma: true });
+      t.push({ ic: '🗡️', tn: 'Emboscar', sub: '7 PA · esconda-se antes', a: { tipo: 'emboscar', alvo: o.id }, ruim: true, confirma: true });
+      S.push({ t: `${esc(o.nome)}${o.aliado ? ' · aliado' : o.tregua ? ' · trégua' : ''}`, tiles: t, pessoa: true });
+    }
+  } else if (aba === 'descansar') {
+    S.push({ t: 'Descanso', tiles: [T('dormir', { sub: '0 PA · ocupa o período', a: { tipo: 'dormir', turnos: 1 } }), T('descansar', { sub: '6 PA · energia +30' }), T('esperar', { sub: '0 PA · passa 1 período', a: { tipo: 'esperar', turnos: 1 } })], nota: 'Dormindo você fica indefeso: esconda-se ou barrique antes. Dormir à noite é o melhor.' });
+  }
+  return S;
+}
+function renderAcoes() {
+  const v = J(), me = v.voce, dead = !me.vivo || me.escapou;
+  if (dead || v.fim) { pintar($('jAcoes'), '<p class="vazio">Você não está mais no jogo.</p>'); return; }
+  const abas = [['explorar', '🧭', 'Explorar'], ['ir', '🚶', 'Ir'], ['sobreviver', '🍖', 'Sobreviver'], ['itens', '🎒', 'Itens'], ['pessoas', '👥', 'Pessoas'], ['descansar', '😴', 'Dormir']];
+  UI.tiles = [];
+  const sec = secoesAcoes(UI.aba);
+  const tile = (t) => { const i = UI.tiles.push(t) - 1; return `<button class="tile ${t.ruim ? 'ruim' : ''} ${t.destaque ? 'destaque' : ''}" data-t="${i}"><span class="ti">${t.ic}</span><span class="tn">${esc(t.tn)}</span><small>${esc(t.sub || '')}</small></button>`; };
+  const corpo = sec.map(s => {
+    const g = s.tiles && s.tiles.length ? `<div class="grade-t">${s.tiles.map(tile).join('')}</div>` : `<p class="vazio">${esc(s.vazio || '')}</p>`;
+    const nota = s.nota ? `<p class="dica" style="margin:6px 0 0">${esc(s.nota)}</p>` : '';
+    if (s.det) return `<details><summary class="sec-t" style="cursor:pointer">${s.t}</summary>${g}</details>`;
+    return `<div class="${s.pessoa ? 'pessoa' : ''}">${s.pessoa ? `<b>${s.t}</b>` : `<div class="sec-t">${s.t}</div>`}${g}${nota}</div>`;
+  }).join('');
+  let form = '';
+  if (UI.form) {
+    const f = UI.form, nm = (id) => (v.jogadores.find(x => x.id === id) || {}).nome || '?';
+    if (f.tipo === 'falar') form = `<div class="form-in"><span class="peq" style="flex:1 1 100%">💬 Falar com <b>${esc(nm(f.alvo))}</b></span><input id="fTexto" maxlength="140" placeholder="O que dizer? (até 140 letras)"><button id="fOk">Adicionar</button><button class="sec" id="fCancel">✕</button></div>`;
+    else if (f.tipo === 'dar') form = `<div class="form-in"><span class="peq" style="flex:1 1 100%">🎁 Dar a <b>${esc(nm(f.alvo))}</b></span><select id="fItem">${v.inventario.map(i => `<option value="${esc(i.id)}">${esc(i.nome)} x${i.qtd}</option>`).join('')}</select><input id="fQtd" type="number" min="1" max="99" value="1" style="max-width:70px"><button id="fOk">Adicionar</button><button class="sec" id="fCancel">✕</button></div>`;
+    else if (f.tipo === 'rastrear') form = `<div class="form-in"><span class="peq" style="flex:1 1 100%">👣 Rastrear quem?</span><select id="fAlvo">${v.jogadores.filter(x => x.id !== me.id && x.estado === 'vivo').map(x => `<option value="${x.id}">${esc(x.nome)}</option>`).join('')}</select><button id="fOk">Adicionar</button><button class="sec" id="fCancel">✕</button></div>`;
+  }
+  const html = `<div class="alvo-per"><span>Adicionar em:</span>${[0, 1, 2].map(k => `<button data-per="${k}" class="${UI.per === k ? 'on' : ''}">${PER_IC[k]} ${PER_NOME[k]}</button>`).join('')}</div>
+    <div class="abas">${abas.map(([k, ic, nm]) => `<button class="aba ${UI.aba === k ? 'on' : ''}" data-aba="${k}"><span class="i">${ic}</span>${nm}</button>`).join('')}</div>${corpo}${form}`;
+  pintar($('jAcoes'), html, (el) => {
+    el.querySelectorAll('[data-per]').forEach(b => b.onclick = () => { UI.per = Number(b.dataset.per); renderPlano(); renderAcoes(); });
+    el.querySelectorAll('[data-aba]').forEach(b => b.onclick = () => { UI.aba = b.dataset.aba; UI.form = null; renderAcoes(); });
+    el.querySelectorAll('[data-t]').forEach(b => b.onclick = () => {
+      const t = UI.tiles[Number(b.dataset.t)]; if (!t) return;
+      if (t.form) { UI.form = { tipo: t.form, alvo: t.alvo }; renderAcoes(); const f = $('fTexto') || $('fItem') || $('fAlvo'); if (f) f.focus(); return; }
+      if (t.confirma && !confirm('Tem certeza? Isso é um ataque.')) return;
+      UI.form = null; addAcao(Object.assign({}, t.a));
+    });
+    const ok = $('fOk'), cn = $('fCancel');
+    if (cn) cn.onclick = () => { UI.form = null; renderAcoes(); };
+    if (ok) ok.onclick = () => {
+      const f = UI.form; let a = null;
+      if (f.tipo === 'falar') { const t = $('fTexto').value.trim(); if (!t) return; a = { tipo: 'falar', alvo: f.alvo, texto: t }; }
+      else if (f.tipo === 'dar') a = { tipo: 'dar', alvo: f.alvo, item: $('fItem').value, qtd: Number($('fQtd').value) || 1 };
+      else if (f.tipo === 'rastrear') { if (!$('fAlvo').value) return; a = { tipo: 'rastrear', alvo: $('fAlvo').value }; }
+      UI.form = null; if (a) addAcao(a); renderAcoes();
+    };
+    const tx = $('fTexto'); if (tx) tx.addEventListener('keydown', (e) => { if (e.key === 'Enter') ok.click(); });
+  });
+}
+
+// ---------- vitais no topo ----------
+function renderVitais() {
+  const me = J().voce;
+  const chip = (cls, ic, nome, val, max, baixo) => `<span class="vt ${cls} ${baixo ? 'baixo' : ''}" data-abrir="status" title="${nome}: ${val}/${max}"><span class="i">${ic}</span><b>${val}</b><span class="mb"><i style="width:${Math.max(0, Math.min(100, 100 * val / max))}%"></i></span></span>`;
+  const html = chip('pv', '❤️', 'Vida', me.pv, me.pvMax, me.pv < me.pvMax * 0.3) + chip('fo', '🍖', 'Fome (100 = saciado)', me.fome, 100, me.fome < 25) + chip('se', '💧', 'Sede (100 = hidratado)', me.sede, 100, me.sede < 25) + chip('en', '⚡', 'Energia', me.energia, 100, me.energia < 20) + chip('mo', '🙂', 'Ânimo', me.moral, 100, me.moral < 25) + chip('pa', '🎯', 'Pontos de ação do dia', me.pa, me.paBase, false);
+  pintar($('jVitais'), html, (el) => el.querySelectorAll('[data-abrir]').forEach(c => c.onclick = () => { abertos.status = true; salvarPaineis(); aplicarPaineis(); document.querySelector('#telaJogo .cp[data-p=status]').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }));
+}
+
+// ---------- painéis de informação ----------
 function renderStatus() {
   const v = J(), me = v.voce;
   const est = me.estados.map(e => `<span class="est">${esc(e)}</span>`).join('') || '<span class="est bom">Em boa forma</span>';
-  $('jStatus').innerHTML = `<h2>${esc(me.nome)} <span class="peq">${esc(me.classeNome || '')}</span></h2>
-    <div class="atr" style="grid-template-columns:64px 1fr 56px"><span>PV</span>${barra('pv', me.pv, me.pvMax)}<b>${me.pv}/${me.pvMax}</b></div>
-    <div class="atr" style="grid-template-columns:64px 1fr 56px"><span>Fome</span>${barra('fome', me.fome)}<b>${me.fome}</b></div>
-    <div class="atr" style="grid-template-columns:64px 1fr 56px"><span>Sede</span>${barra('sede', me.sede)}<b>${me.sede}</b></div>
-    <div class="atr" style="grid-template-columns:64px 1fr 56px"><span>Energia</span>${barra('en', me.energia)}<b>${me.energia}</b></div>
-    <div class="atr" style="grid-template-columns:64px 1fr 56px"><span>Ânimo</span>${barra('mo', me.moral)}<b>${me.moral}</b></div>
+  const lin = (nm, cls, val, max) => `<div class="atr" style="grid-template-columns:64px 1fr 56px"><span>${nm}</span>${barra(cls, val, max)}<b>${val}${max && max !== 100 ? '/' + max : ''}</b></div>`;
+  pintar($('jStatus'), `<div class="peq" style="margin-bottom:6px">${esc(me.nome)} · ${esc(me.classeNome || '')}</div>
+    ${lin('❤️ Vida', 'pv', me.pv, me.pvMax)}${lin('🍖 Fome', 'fome', me.fome)}${lin('💧 Sede', 'sede', me.sede)}${lin('⚡ Energia', 'en', me.energia)}${lin('🙂 Ânimo', 'mo', me.moral)}
     <div style="margin:6px 0">${est}</div>
     <div class="peq">Dor ${me.dor} · Proteção ${me.protecao} · PA ${me.pa}/${me.paBase}${me.sangramento ? ' · 🩸 sangrando' : ''}${me.infeccao ? ' · infecção ' + me.infeccao : ''}${me.escondido ? ' · 🫥 escondido' : ''}</div>
+    <div class="peq" style="margin-top:4px">100 = cheio. Fome cai ~25 por dia, sede ~34, energia ~21.</div>
     <details><summary>Atributos e traços</summary>
       ${Object.keys(NOMES_ATR).map(k => `<div class="atr"><span>${NOMES_ATR[k]}</span>${barra('', me.atributosEfetivos[k], 10)}<b>${me.atributosEfetivos[k]}${me.atributosEfetivos[k] !== me.atributos[k] ? '<span class="peq">/' + me.atributos[k] + '</span>' : ''}</b></div>`).join('')}
       ${me.tracos.map(t => `<div class="peq"><b style="color:var(--verde)">${esc(t.nome)}</b>: ${esc(t.desc)}</div>`).join('')}
-      <div class="peq">Fragmentos de mapa: ${me.fragmentos}</div></details>`;
+      <div class="peq">Fragmentos de mapa: ${me.fragmentos}</div></details>`);
 }
 function resumoUso(i) {
   const u = i.uso; if (!u) return '';
@@ -502,52 +688,30 @@ function resumoUso(i) {
   return p.join(', ');
 }
 function renderInv() {
-  const v = J(), dead = !v.voce.vivo || v.voce.escapou;
-  $('jPeso').textContent = `(${v.voce.peso}/${v.voce.capacidade} kg)`;
-  const inv = v.inventario.slice().sort((a, b) => a.nome.localeCompare(b.nome));
-  $('jInv').innerHTML = inv.length ? inv.map(i => {
-    const b = [];
-    if (!dead) {
-      if (i.uso && i.uso.fome > 0) b.push(['comer', 'Comer']); else if (i.uso && i.uso.sede > 0) b.push(['beber', 'Beber']); else if (i.uso) b.push(['usar', 'Usar']);
-      if (i.slot || i.dano) b.push(['equipar', i.equipado ? 'Equipado' : 'Equipar']);
-      if (i.cozinha) b.push(['cozinhar', 'Cozinhar']);
-      if (i.tags.includes('armadilha')) b.push(['armar_armadilha', 'Armar']);
-      b.push(['largar', 'Largar']);
-    }
-    return `<div class="linha"><div class="nm">${esc(i.nome)} <b>x${i.qtd}</b>${i.equipado ? ' <span class="tag">equipado</span>' : ''}<small>${esc(resumoUso(i))}${i.dano ? (i.uso ? ' · ' : '') + 'dano ' + i.dano[0] + '-' + i.dano[1] : ''}${i.diasRestantes != null ? ' · estraga em ~' + i.diasRestantes + ' dia(s)' : ''}${i.risco ? ' · risco de passar mal' : ''}</small></div>
-      <div class="btns">${b.map(x => `<button class="mini" data-t="${x[0]}" data-i="${esc(i.id)}">${x[1]}</button>`).join('')}</div></div>`; }).join('') : '<p class="dica">Mochila vazia.</p>';
-  $('jInv').querySelectorAll('[data-t]').forEach(b => b.onclick = () => { const a = { tipo: b.dataset.t, item: b.dataset.i }; if (a.tipo === 'largar') a.qtd = 1; addAcao(a); });
+  const v = J(), me = v.voce, inv = v.inventario.slice().sort((a, b) => a.nome.localeCompare(b.nome));
+  $('jPeso').textContent = `${me.peso}/${me.capacidade} kg`;
+  const cheia = me.peso / me.capacidade > 0.85;
+  pintar($('jInv'), `<div class="peso-barra ${cheia ? 'cheia' : ''}"><i style="width:${Math.min(100, 100 * me.peso / me.capacidade)}%"></i></div>` + (inv.length ? inv.map(i => `<div class="it"><span class="ic">${i.icone}</span><div>${esc(i.nome)} <b>x${i.qtd}</b>${i.equipado ? ' <span class="tag">equipado</span>' : ''}<small>${esc(resumoUso(i))}${i.dano ? (i.uso ? ' · ' : '') + 'dano ' + i.dano[0] + '-' + i.dano[1] : ''}${i.diasRestantes != null ? ' · estraga em ~' + i.diasRestantes + ' dia(s)' : ''}${i.risco ? ' · risco de passar mal' : ''}</small></div><span class="peq">${(i.peso * i.qtd).toFixed(1)} kg</span></div>`).join('') : '<p class="vazio">Mochila vazia. Vasculhe lugares para achar coisas.</p>') + '<p class="dica" style="margin-top:6px">Para usar, comer ou largar algo, vá em ⚡ Ações → Itens.</p>');
 }
 function renderCraft() {
   const v = J(), dead = !v.voce.vivo || v.voce.escapou;
-  $('jCraft').innerHTML = v.receitas.map(r => `<div class="linha"><div class="nm">${esc(r.nome)}<small>${esc(r.ing)}${r.ferr ? ' · precisa de lâmina' : ''} · ${r.custo} PA</small></div><div class="btns"><button class="mini" data-fab="${r.id}" ${(dead || !r.pode) ? 'disabled' : ''}>Fabricar</button></div></div>`).join('');
-  $('jCraft').querySelectorAll('[data-fab]').forEach(b => b.onclick = () => addAcao({ tipo: 'fabricar', receita: b.dataset.fab }));
+  const ok = v.receitas.filter(r => r.pode);
+  pintar($('jCraft'), dead ? '<p class="vazio">Você não está mais no jogo.</p>' : ok.length
+    ? `<div class="alvo-per"><span>Adicionar em:</span>${[0, 1, 2].map(k => `<button data-per="${k}" class="${UI.per === k ? 'on' : ''}">${PER_IC[k]} ${PER_NOME[k]}</button>`).join('')}</div><div class="grade-t">${ok.map(r => `<button class="tile" data-fab="${r.id}"><span class="ti">🛠️</span><span class="tn">${esc(r.nome)}</span><small>${esc(r.ing)} · ${r.custo} PA</small></button>`).join('')}</div>`
+    : '<p class="vazio">Você não tem materiais para fabricar nada agora. Junte coisas como trapos, galhos, corda e pedras vasculhando por aí. Quando der para fazer algo, aparece aqui.</p>',
+    (el) => { el.querySelectorAll('[data-fab]').forEach(b => b.onclick = () => addAcao({ tipo: 'fabricar', receita: b.dataset.fab })); el.querySelectorAll('[data-per]').forEach(b => b.onclick = () => { UI.per = Number(b.dataset.per); renderPlano(); renderAcoes(); renderCraft(); }); });
 }
 function renderRegiao() {
   const v = J(), r = v.regiao, dead = !v.voce.vivo || v.voce.escapou;
-  const dirs = { norte: '↑ Norte', sul: '↓ Sul', leste: '→ Leste', oeste: '← Oeste' };
-  let h = `<h2>${r.icone} ${esc(r.nome)} ${r.neblina ? '<span class="est">🌫️ NÉVOA</span>' : ''}${!r.luz ? '<span class="est">sem luz</span>' : ''}${r.fogueira ? '<span class="est bom">🔥 fogueira</span>' : ''}${r.abrigo ? '<span class="est bom">⛺ abrigo</span>' : ''}</h2><div class="peq">🌡️ ${r.temp}°C (manhã) · mais frio à noite${v.voce.temp != null ? ' · agora sente ' + v.voce.temp + '°C' : ''}</div>`;
-  if (dead) h += '<p class="dica">Você não está mais no mundo.</p>';
-  h += '<h3>Locais</h3>' + (r.locais.length ? r.locais.map(l => {
-    const cheio = l.cmdVasculhados >= l.cmdTotal;
-    return `<div class="linha"><div class="nm">${l.icone} ${esc(l.nome)}<small>${l.cmdVasculhados}/${l.cmdTotal} cômodos já vasculhados${v.voce.local === l.id ? ' · você está aqui' : ''}</small></div>
-      <div class="btns">${dead ? '' : l.trancado ? `<span class="est">🔒 trancado</span><button class="mini" data-a="arrombar" data-l="${esc(l.id)}">Arrombar</button>` : `<button class="mini" data-a="vasculhar" data-l="${esc(l.id)}">Vasculhar</button><button class="mini" data-a="vasculhar_fundo" data-l="${esc(l.id)}">A fundo</button><button class="mini" data-a="ir" data-l="${esc(l.id)}">Ir</button>`}</div></div>`; }).join('') : '<p class="dica">Só terreno aberto.</p>');
-  if (r.armadilhas.length) h += '<h3>Suas armadilhas aqui</h3>' + r.armadilhas.map(x => `<div class="peq">🪤 ${esc(x.item)}${x.presa ? ' — <b style="color:var(--verde)">' + x.presa + ' presa(s)!</b>' : ''}</div>`).join('');
-  if (r.chao.length) h += '<h3>No chão</h3>' + r.chao.map(c => `<div class="linha"><div class="nm">${esc(c.nome)} <b>x${c.qtd}</b></div><div class="btns">${dead ? '' : `<button class="mini" data-pg="${esc(c.id)}">Pegar</button>`}</div></div>`).join('');
-  h += '<h3>Quem está aqui</h3>' + (v.presentes.length ? v.presentes.map(o => `<div class="linha"><div class="nm">${esc(o.nome)}${o.aliado ? ' <span class="tag">aliado</span>' : ''}${o.tregua ? ' <span class="tag">trégua</span>' : ''}</div>
-      <div class="btns">${dead ? '' : `<button class="mini" data-f="${o.id}">Falar</button><button class="mini" data-d="${o.id}">Dar</button><button class="mini" data-q="tregua" data-id="${o.id}">Trégua</button><button class="mini" data-q="alianca" data-id="${o.id}">Aliança</button><button class="mini" data-x="furtar" data-id="${o.id}">Furtar</button><button class="mini" data-x="atacar" data-id="${o.id}" style="color:var(--vermelho)">Atacar</button>`}</div></div>`).join('') : '<p class="dica">Ninguém à vista no começo da rodada (pode mudar durante ela).</p>');
-  h += '<h3>Caminhos</h3><div class="btns" style="justify-content:flex-start">' + Object.keys(r.vizinhas).map(d => { const n = r.vizinhas[d]; return `<button class="mini" data-mv="${d}" ${dead ? 'disabled' : ''}>${dirs[d]}: ${n.icone} ${esc(n.nome)}${n.neblina ? ' 🌫️' : ''}</button>`; }).join('') + '</div>';
-  h += dead ? '' : `<div class="btns" style="justify-content:flex-start;margin-top:8px"><button class="mini" data-s="observar">🔭 Observar</button><button class="mini" data-s="esconder">🫥 Esconder-se</button><button class="mini" data-s="coletar_agua">🚰 Pegar água</button><button class="mini" data-s="pescar">🎣 Pescar</button><button class="mini" data-s="cacar">🏹 Caçar</button><button class="mini" data-s="fogueira">🔥 Fogueira</button><button class="mini" data-s="purificar">💧 Purificar</button><button class="mini" data-s="tratar">🩹 Tratar feridas</button><button class="mini" data-s="descansar">🛌 Descansar</button><button class="mini" data-s="construir_abrigo">⛺ Abrigo</button><button class="mini" data-s="barricar">🚪 Barricar</button>${r.armadilhas.some(x => x.presa) ? '<button class="mini" data-s="recolher">🪤 Recolher presas</button>' : ''}<button class="mini" data-dm="2">😴 Dormir 2</button><button class="mini" data-dm="3">😴 Dormir 3</button>${v.voce.podeEscapar ? '<button class="mini" data-s="escapar" style="color:var(--roxo)">✨ Atravessar</button>' : ''}</div>`;
-  const el = $('jRegiao'); el.innerHTML = h;
-  el.querySelectorAll('[data-a]').forEach(b => b.onclick = () => addAcao({ tipo: b.dataset.a, local: b.dataset.l }));
-  el.querySelectorAll('[data-pg]').forEach(b => b.onclick = () => addAcao({ tipo: 'pegar_chao', item: b.dataset.pg }));
-  el.querySelectorAll('[data-f]').forEach(b => b.onclick = () => preencher('falar', { alvo: b.dataset.f }));
-  el.querySelectorAll('[data-d]').forEach(b => b.onclick = () => preencher('dar', { alvo: b.dataset.d }));
-  el.querySelectorAll('[data-q]').forEach(b => b.onclick = () => addAcao({ tipo: 'propor', alvo: b.dataset.id, tipoAcordo: b.dataset.q }));
-  el.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { if (b.dataset.x === 'atacar' && !confirm('Atacar esta pessoa?')) return; addAcao({ tipo: b.dataset.x, alvo: b.dataset.id }); });
-  el.querySelectorAll('[data-mv]').forEach(b => b.onclick = () => addAcao({ tipo: 'mover', dir: b.dataset.mv }));
-  el.querySelectorAll('[data-s]').forEach(b => b.onclick = () => addAcao({ tipo: b.dataset.s }));
-  el.querySelectorAll('[data-dm]').forEach(b => b.onclick = () => addAcao({ tipo: 'dormir', turnos: Number(b.dataset.dm) }));
+  const dirs = { norte: '⬆️ Norte', sul: '⬇️ Sul', leste: '➡️ Leste', oeste: '⬅️ Oeste' };
+  let h = `<div style="font-size:16px;margin-bottom:4px">${r.icone} <b>${esc(r.nome)}</b> ${r.neblina ? '<span class="est">🌫️ NÉVOA</span>' : ''}${!r.luz ? '<span class="est">sem luz</span>' : ''}${r.fogueira ? '<span class="est bom">🔥 fogueira</span>' : ''}${r.abrigo ? '<span class="est bom">⛺ abrigo</span>' : ''}</div>
+    <div class="peq">🌡️ ${r.temp}°C de manhã · mais frio à noite${v.voce.temp != null ? ' · você sentiu ' + v.voce.temp + '°C' : ''}</div>`;
+  h += '<div class="sec-t" style="margin-top:10px">Locais</div>' + (r.locais.length ? r.locais.map(l => `<div class="peq" style="padding:2px 0">${l.icone} ${esc(l.nome)} · ${l.trancado ? '🔒 trancado' : l.cmdVasculhados + '/' + l.cmdTotal + ' cômodos vasculhados'}${v.voce.local === l.id ? ' · <b>você está aqui</b>' : ''}</div>`).join('') : '<div class="peq">Só terreno aberto.</div>');
+  if (r.armadilhas.length) h += '<div class="sec-t" style="margin-top:10px">Suas armadilhas</div>' + r.armadilhas.map(x => `<div class="peq">🪤 ${esc(x.item)}${x.presa ? ' — <b style="color:var(--verde)">' + x.presa + ' presa(s)!</b>' : ''}</div>`).join('');
+  if (r.chao.length) h += '<div class="sec-t" style="margin-top:10px">No chão</div>' + r.chao.map(c => `<div class="peq">📦 ${esc(c.nome)} x${c.qtd}</div>`).join('');
+  h += '<div class="sec-t" style="margin-top:10px">Quem está aqui</div>' + (v.presentes.length ? v.presentes.map(o => `<div class="peq">👤 ${esc(o.nome)}${o.aliado ? ' <span class="tag">aliado</span>' : ''}${o.tregua ? ' <span class="tag">trégua</span>' : ''}</div>`).join('') : '<div class="peq">Ninguém à vista no começo do dia.</div>');
+  h += '<div class="sec-t" style="margin-top:10px">Caminhos</div><div class="peq">' + Object.keys(r.vizinhas).map(d => { const n = r.vizinhas[d]; return `${dirs[d]}: ${n.icone} ${esc(n.nome)}${n.neblina ? ' 🌫️' : ''}`; }).join('<br>') + '</div>';
+  pintar($('jRegiao'), dead ? h + '<p class="dica">Você não está mais no mundo.</p>' : h);
 }
 const cvJogo = criarMundoCanvas($('jMapaCv'), { onClick: (id) => {
   if (!E || !E.jogo) return; const me = E.jogo.regiao, dir = Object.keys(me.vizinhas).find(d => me.vizinhas[d].id === id);
@@ -556,14 +720,17 @@ function renderMapa() {
   const v = J(), m = v.mapa, me = v.regiao;
   cvJogo.atualizar({ seed: m.seed, N: m.N, regioes: m.regioes, eu: v.voce.vivo && !v.voce.escapou ? me.id : null, vizinhas: Object.values(me.vizinhas).map(x => x.id),
     aliados: v.voce.aliados, outros: v.presentes.filter(o => !o.aliado).map(o => ({ regiao: me.id, nome: o.nome })), pista: m.pista });
-  $('jMapaDica').textContent = `Névoa: estágio ${m.estagio}/${m.estagioMax}. Clique numa região vizinha (borda azul) para planejar o caminho.` + (m.pista.x != null || m.pista.regiao != null ? ' Faixa/X roxo = pista de mapa que você achou.' : '');
+  $('jMapaDica').textContent = `Névoa: estágio ${m.estagio}/${m.estagioMax}. Clique numa região vizinha (borda azul) para ir até ela no período escolhido.` + (m.pista.x != null || m.pista.regiao != null ? ' Faixa/X roxo = pista de mapa que você achou.' : '');
 }
 function renderDiario() {
-  const v = J(), base = (r) => (r - 1) * 3 + 1;
+  const v = J();
   const hist = v.historico.slice().reverse();
-  $('jDiario').innerHTML = hist.length ? hist.map((h, idx) => {
-    const corpo = h.entradas.length ? h.entradas.map(e => `<div class="e t-${esc(e.tipo)}"><span class="w">Dia ${e.d} · ${esc(e.per)}</span>${esc(e.texto)}</div>`).join('') : '<div class="e t-sistema">Nada aconteceu (você ficou parado).</div>';
-    return `<details ${idx === 0 ? 'open' : ''}><summary>Rodada ${h.rodada} (dias ${base(h.rodada)}–${base(h.rodada) + 2})</summary>${corpo}</details>`; }).join('') : '<p class="dica">O diário aparece depois da primeira rodada. Planeje e aperte "Terminei o planejamento".</p>';
+  const bloco = (h, idx) => {
+    const res = h.entradas.filter(e => e.tipo === 'resumo'), ev = h.entradas.filter(e => e.tipo !== 'resumo');
+    const grupos = [0, 1, 2].map(k => { const l = ev.filter(e => Math.min(2, e.t) === k); return l.length ? `<div class="per-t">${PER_IC[k]} ${PER_NOME[k]}</div>` + l.map(e => `<div class="e t-${esc(e.tipo)}">${esc(e.texto)}</div>`).join('') : ''; }).join('');
+    return `<details ${idx === 0 ? 'open' : ''}><summary>Dia ${h.rodada}</summary>${res.map(e => `<div class="resumo-dia">📊 <b>Como foi seu dia</b><br>${esc(e.texto).split('  ·  ').join('<br>')}</div>`).join('')}${grupos || '<div class="e t-sistema">Nada aconteceu (você ficou parado).</div>'}</details>`;
+  };
+  pintar($('jDiario'), hist.length ? hist.map(bloco).join('') : '<p class="dica">O diário aparece depois do primeiro dia. Planeje e aperte ✔ Pronto.</p>');
 }
 function renderPropostas() {
   const v = J(), el = $('jPropostas');
@@ -572,39 +739,36 @@ function renderPropostas() {
   for (const p of v.propostasEnviadas) itens.push(`<div class="peq">⏳ Aguardando ${esc(p.paraNome)} responder à sua proposta de ${p.tipo === 'alianca' ? 'aliança' : 'trégua'}.</div>`);
   for (const a of v.avisos.slice(-3)) itens.push(`<div class="peq">${esc(a.texto)}</div>`);
   el.classList.toggle('oculto', !itens.length);
-  el.innerHTML = itens.join('');
-  el.querySelectorAll('[data-pp]').forEach(b => b.onclick = () => socket.emit('proposta', { id: Number(b.dataset.pp), aceitar: b.dataset.ac === '1' }));
+  pintar(el, itens.join(''), (e) => e.querySelectorAll('[data-pp]').forEach(b => b.onclick = () => socket.emit('proposta', { id: Number(b.dataset.pp), aceitar: b.dataset.ac === '1' })));
 }
 function renderLateral() {
   const v = J();
-  $('jPublico').innerHTML = v.publico.length ? v.publico.slice().reverse().map(p => `<div class="e t-${esc(p.tipo)}"><span class="w">R${p.rodada}</span>${esc(p.texto)}</div>`).join('') : '<p class="dica">Sem notícias ainda.</p>';
-  $('jJogadores').innerHTML = v.jogadores.map(j => `<div class="linha"><div class="nm">${esc(j.nome)}${j.id === v.voce.id ? ' (você)' : ''}${j.aliado ? ' <span class="tag">aliado</span>' : ''}<small>${esc(j.classeNome || '')}${j.causa ? ' · ' + esc(j.causa) : ''}</small></div><span class="${j.estado === 'vivo' ? 'tag' : 'off'}">${j.estado === 'vivo' ? 'vivo' : j.estado === 'morto' ? '💀 morto' : '🌫️ desaparecido'}</span></div>`).join('');
+  pintar($('jPublico'), v.publico.length ? v.publico.slice().reverse().map(p => `<div class="e t-${esc(p.tipo)}"><span class="w">Dia ${p.rodada}</span>${esc(p.texto)}</div>`).join('') : '<p class="dica">Sem notícias ainda.</p>');
+  pintar($('jJogadores'), v.jogadores.map(j => `<div class="linha"><div class="nm">${esc(j.nome)}${j.id === v.voce.id ? ' (você)' : ''}${j.aliado ? ' <span class="tag">aliado</span>' : ''}<small>${esc(j.classeNome || '')}${j.causa ? ' · ' + esc(j.causa) : ''}</small></div><span class="${j.estado === 'vivo' ? 'tag' : 'off'}">${j.estado === 'vivo' ? 'vivo' : j.estado === 'morto' ? '💀 morto' : '🌫️ desaparecido'}</span></div>`).join(''));
   const prontos = E.jogadores.filter(j => j.pronto).length;
   $('jProntos').textContent = `Prontos: ${prontos}/${E.jogadores.length}`;
 }
 function renderJogo() {
   const v = J(), me = v.voce;
-  const rodNum = v.fim ? v.rodada : v.rodada + 1;
-  $('jRodada').textContent = v.fim ? `Fim · ${v.rodada} rodadas` : `Rodada ${rodNum} · Dias ${v.diaInicio}–${v.diaInicio + 2}`;
+  if (UI.rodada !== v.rodada) { UI.rodada = v.rodada; UI.per = 0; UI.form = null; }
+  $('jRodada').textContent = v.fim ? `Fim · ${v.rodada} dias` : `Dia ${v.diaInicio}`;
+  $('jFase').textContent = v.fim ? 'a partida terminou' : v.pronto ? 'aguardando os outros…' : 'planeje manhã, tarde e noite';
   const dead = !me.vivo || me.escapou;
   $('btnPronto').classList.toggle('oculto', dead || v.fim);
-  $('btnPronto').textContent = v.pronto ? '↩ Voltar a editar' : '✔ Terminei o planejamento';
+  $('btnPronto').textContent = v.pronto ? '↩ Voltar a editar' : '✔ Pronto, passar o dia';
   $('btnPronto').className = v.pronto ? 'sec' : 'verde';
   let faixa = '';
   if (v.fim) {
     faixa = `<div class="faixa fim"><h2 style="font-size:16px">${esc(v.resultado ? v.resultado.texto : 'Fim de jogo')}</h2>
-      <table class="res"><tr><th>Jogador</th><th>Classe</th><th>Destino</th><th>Abates</th></tr>${(v.resumoFinal || []).map(r => `<tr><td>${esc(r.nome)}</td><td>${esc(r.classe || '')}</td><td>${r.estado === 'morto' ? '💀 ' + esc(r.causa || '') + ' (R' + r.rodadaMorte + ')' : r.estado === 'desaparecido' ? '🌫️ desapareceu' : '🏆 sobreviveu'}</td><td>${r.kills}</td></tr>`).join('')}</table>
+      <table class="res"><tr><th>Jogador</th><th>Classe</th><th>Destino</th><th>Abates</th></tr>${(v.resumoFinal || []).map(r => `<tr><td>${esc(r.nome)}</td><td>${esc(r.classe || '')}</td><td>${r.estado === 'morto' ? '💀 ' + esc(r.causa || '') + ' (dia ' + r.rodadaMorte + ')' : r.estado === 'desaparecido' ? '🌫️ desapareceu' : '🏆 sobreviveu'}</td><td>${r.kills}</td></tr>`).join('')}</table>
       ${E.voce.host ? '<button class="verde full" id="btnNova">Nova partida (voltar à sala)</button>' : '<p class="dica">O anfitrião pode iniciar outra partida.</p>'}</div>`;
   } else if (me.escapou) faixa = '<div class="faixa fim">🌌 Você atravessou e sumiu do mundo. Agora observa os que ficaram.</div>';
   else if (!me.vivo) faixa = `<div class="faixa morto">💀 Você morreu: ${esc(me.causa || '')}. Pode acompanhar a partida e conversar com os outros mortos.</div>`;
-  $('jFaixa').innerHTML = faixa;
-  if ($('btnNova')) $('btnNova').onclick = () => socket.emit('reiniciar');
-  // postura
+  pintar($('jFaixa'), faixa, () => { if ($('btnNova')) $('btnNova').onclick = () => socket.emit('reiniciar'); });
   const sel = $('jPostura');
-  if (sel.dataset.pronto !== '1') { sel.innerHTML = Object.keys(v.posturas).map(k => `<option value="${k}">${esc(v.posturas[k])}</option>`).join(''); sel.dataset.pronto = '1'; }
+  if (sel.dataset.pronto !== '1') { const IP = { evitar: '🙈', acolher: '🤗', defender: '🛡️', atacar: '⚔️' }; sel.innerHTML = Object.keys(v.posturas).map(k => `<option value="${k}">${IP[k] || ''} ${esc(v.posturas[k])}</option>`).join(''); sel.dataset.pronto = '1'; }
   sel.value = v.postura; sel.disabled = dead || v.fim;
-  $('jPlano').classList.toggle('oculto', v.fim);
-  renderStatus(); renderInv(); renderCraft(); renderRegiao(); renderMapa(); renderDiario(); renderPropostas(); renderFila(); renderForm(); renderLateral(); renderChats();
+  renderVitais(); renderPlano(); renderAcoes(); renderInv(); renderCraft(); renderRegiao(); renderStatus(); renderMapa(); renderDiario(); renderPropostas(); renderLateral(); renderChats();
 }
 $('nome').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btnCriar').click(); });
 </script>

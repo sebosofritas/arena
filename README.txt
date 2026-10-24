@@ -1,4 +1,4 @@
-ARENA DE SOBREVIVENCIA - versao 0.5 (mapa grande)
+ARENA DE SOBREVIVENCIA - versao 0.6 (um dia por rodada, tela nova)
 
 Pastas e arquivos:
   server.js          o servidor (liga a tela ao jogo e salva as salas)

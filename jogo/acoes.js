@@ -24,8 +24,8 @@ const ACOES = {
   construir_abrigo:{ nome: 'Construir abrigo', custo: 6, grupo: 'Fabricação', p: [], divisivel: true, desc: 'Precisa de lona, ou 4 galhos e um pano/lençol/cobertor. Protege do frio e da chuva.' },
   barricar:        { nome: 'Barricar o local', custo: 3, grupo: 'Fabricação', p: [], desc: 'Precisa de 2 tábuas (ou cadeado). Ninguém entra sem arrombar; você fica muito mais difícil de achar.' },
   arrombar:        { nome: 'Arrombar porta', custo: 2, grupo: 'Exploração', p: ['local'], desc: 'Abre local trancado. Pé de cabra, kit de arrombamento ou chave-mestra ajudam. Faz barulho.' },
-  comer:           { nome: 'Comer', custo: 0.5, grupo: 'Itens', p: ['item'], desc: 'Nada é automático: se não comer, passa fome.' },
-  beber:           { nome: 'Beber', custo: 0.5, grupo: 'Itens', p: ['item'], desc: 'Sede cai rápido: cerca de 3 bebidas por rodada.' },
+  comer:           { nome: 'Comer', custo: 0.5, grupo: 'Itens', p: ['item'], desc: 'Nada é automático: se não comer, passa fome (cerca de 25 por dia).' },
+  beber:           { nome: 'Beber', custo: 0.5, grupo: 'Itens', p: ['item'], desc: 'A sede cai cerca de 34 por dia: planeje beber.' },
   usar:            { nome: 'Usar item (remédio...)', custo: 1, grupo: 'Itens', p: ['item'], desc: 'Bandagem, analgésico, antibiótico, tala...' },
   equipar:         { nome: 'Equipar', custo: 0.25, grupo: 'Itens', p: ['item'], desc: 'Veste roupa/proteção ou empunha uma arma/ferramenta.' },
   largar:          { nome: 'Largar no chão', custo: 0.25, grupo: 'Itens', p: ['item', 'qtd?'], desc: 'Deixa um item na região (para aliviar peso ou guardar).' },
@@ -72,7 +72,7 @@ function sanitizarFila(fila, jogadoresIds) {
       else if (k === 'item') { if (!v || typeof v !== 'string' || !infoItem(v)) { erros.push('Item inválido.'); a.invalida = true; } else a.item = v; }
       else if (k === 'qtd') { const n = Math.floor(Number(v)); a.qtd = Number.isFinite(n) && n >= 1 ? Math.min(n, 99) : 1; }
       else if (k === 'texto') { a.texto = txt(v, 140).replace(/[\u0000-\u001f]/g, ' ').trim(); if (!a.texto) a.invalida = true; }
-      else if (k === 'turnos') { const n = Math.floor(Number(v)); a.turnos = Number.isFinite(n) ? Math.max(1, Math.min(12, n)) : 1; }
+      else if (k === 'turnos') { const n = Math.floor(Number(v)); a.turnos = Number.isFinite(n) ? Math.max(1, Math.min(REGRAS.TURNOS, n)) : 1; }
       else if (k === 'receita') { if (!RECEITAS[v]) a.invalida = true; else a.receita = v; }
       else if (k === 'acordo') { if (v !== 'tregua' && v !== 'alianca') a.invalida = true; else a.tipoAcordo = v; }
     }

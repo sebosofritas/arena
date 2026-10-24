@@ -25,7 +25,9 @@ function agendarSalvar(sala) {
   pendentes.set(sala.codigo, setTimeout(() => { pendentes.delete(sala.codigo); if (salas.get(sala.codigo) === sala) Persist.salvar(sala); }, 2000));
 }
 function aoCriar(s) { s.aoMudar = agendarSalvar; return s; }
+const { REGRAS } = require('./jogo/config');
 for (const d of Persist.carregarTodas()) {
+  if (d.jogo && d.jogo.versao !== REGRAS.VERSAO) { console.log('Save de versão antiga ignorado:', d.codigo); Persist.apagar(d.codigo); continue; }
   try { const s = aoCriar(Sala.importar(d)); salas.set(s.codigo, s); console.log('Sala restaurada:', s.codigo, s.fase); }
   catch (e) { console.error('Não consegui restaurar uma sala:', e.message); }
 }

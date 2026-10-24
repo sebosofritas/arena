@@ -103,9 +103,9 @@ module.exports = { TEMAS, gerarMundo, vizinhas, distancia, aplicarNeblina, estag
 
 // ---------- temperatura ----------
 const TEMP_BASE = { centro: 24, bairro: 23, industrial: 24, rural: 22, mata: 20, montanha: 12, lago: 20, pantano: 25, militar: 23, comercio: 24, hospitalar: 23, campus: 23, rodovia: 25, ruinas: 20, praia: 26 };
-const TEMP_PERIODO = [0, 5, -5, -9];
+const TEMP_PERIODO = [0, 5, -7]; // manhã, tarde, noite
 function temperatura(regiao, diaGlobal, turnoDoDia) {
   const deriva = -0.5 * diaGlobal + 3 * Math.sin(diaGlobal / 2.5);
-  return Math.round((TEMP_BASE[regiao.tema] || 22) + TEMP_PERIODO[turnoDoDia % 4] + deriva - (regiao.neblina ? 3 : 0));
+  return Math.round((TEMP_BASE[regiao.tema] || 22) + TEMP_PERIODO[turnoDoDia % 3] + deriva - (regiao.neblina ? 3 : 0));
 }
 module.exports.temperatura = temperatura;

@@ -76,5 +76,28 @@ const v = s2.estadoPara('j1').jogo;
 ok(v.voce.nome === 'Ana' && v.mapa.seed === sala.jogo.mundo.seed, 'estado coerente após restaurar');
 s2.pronto('j1', true); s2.pronto('j2', true);
 ok(s2.jogo.rodada === 2, 'restaurada continua jogando (rodada ' + s2.jogo.rodada + ')');
+
+// ---- v0.6: ações disponíveis, resumo do dia, 1 dia por rodada ----
+{
+  const { Jogo } = require('./jogo/motor');
+  const { configPadrao } = require('./jogo/config');
+  const P2 = require('./jogo/personagem');
+  const { criarRng: cr } = require('./data/sorteio');
+  const rng2 = cr(5);
+  const ps = ['a', 'b'].map((n, i) => { const p = P2.novoPersonagem('j' + i, n, rng2); p.inicio = 20; return p; });
+  const j = new Jogo(ps, configPadrao(), 9);
+  const [a, b] = ps;
+  const v0 = j.visao(a.id);
+  ok(v0.disp && v0.disp.fogueira === false && v0.disp.pescar === false, 'sem equipamento: sem fogueira/pesca nas ações');
+  ok(v0.receitas.filter(r => r.pode).length === 0, 'sem materiais: nenhuma receita possível');
+  ok(!v0.presentes.some(o => o.tregua), 'ninguém começa em trégua com todo mundo');
+  a.fome = 40; a.inv.macarrao_instantaneo = 1;
+  a.fila = [{ tipo: 'comer', item: 'macarrao_instantaneo' }]; b.fila = [];
+  j.resolver();
+  ok(j.rodada === 1 && j.visao(a.id).diaInicio === 2, 'uma rodada = um dia');
+  const res = a.hist[a.hist.length - 1].entradas.find(e => e.tipo === 'resumo');
+  ok(res && /comeu \+/.test(res.texto), 'resumo do dia mostra o que comeu: ' + (res && res.texto));
+  ok(a.hist[a.hist.length - 1].entradas.every(e => e.t >= 0 && e.t <= 2), 'só 3 períodos');
+}
 console.log(erros ? erros + ' ERRO(S)' : 'Extras OK');
 process.exit(erros ? 1 : 0);

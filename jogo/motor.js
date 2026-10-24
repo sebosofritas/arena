@@ -1,6 +1,6 @@
 'use strict';
 // =====================================================================
-//  MOTOR DO JOGO: resolve uma rodada (12 turnos = 3 dias) de uma vez.
+//  MOTOR DO JOGO: resolve uma rodada (1 dia = 3 períodos: manhã, tarde, noite) de uma vez.
 //  Não depende de internet nem de pacotes: só Node puro.
 // =====================================================================
 const { LOCAIS } = require('../data/locais');
@@ -31,12 +31,43 @@ const DICAS_LORE = [
   'Escrito às pressas: "Se achar os pedaços do mapa, não conte para ninguém."',
 ];
 
+// ícone simples para cada item (a tela usa isso nas listas)
+function iconeItem(id, it) {
+  if (!it) return '📦';
+  const t = it.tags || [], u = it.uso || {};
+  if (id === 'agua_rio') return '🟤';
+  if (t.includes('arma_fogo')) return '🔫';
+  if (t.includes('arma_distancia')) return '🏹';
+  if (t.includes('arma_branca') || it.dano) return '🗡️';
+  if (t.includes('municao')) return '🔸';
+  if (u.sede) return t.includes('alcool') ? '🍺' : '🥤';
+  if (/carne|peixe|ovo/.test(id)) return '🥩';
+  if (u.fome) return t.includes('comida_conserva') ? '🥫' : t.includes('doce') ? '🍫' : '🍞';
+  if (u.sangramento || u.fratura) return '🩹';
+  if (t.includes('medicina') || t.includes('medicina_forte') || u.pv || u.dor || u.infeccao) return '💊';
+  if (t.includes('capacete')) return '🪖';
+  if (t.includes('calcado')) return '👟';
+  if (t.includes('mochila')) return '🎒';
+  if (t.includes('roupa') || it.slot) return '👕';
+  if (t.includes('fogo')) return '🔥';
+  if (t.includes('chave')) return '🔑';
+  if (t.includes('luz')) return '🔦';
+  if (t.includes('corda')) return '🪢';
+  if (t.includes('material')) return '🪵';
+  if (t.includes('mapa')) return '🗺️';
+  if (t.includes('livro') || t.includes('lore')) return '📜';
+  if (t.includes('ferramenta')) return '🔧';
+  if (t.includes('pesca')) return '🎣';
+  if (t.includes('camping') || t.includes('sobrevivencia')) return '⛺';
+  return '📦';
+}
+
 class Jogo {
   constructor(personagens, cfg, seed, mundo) {
     this.cfg = cfg;
     this.rng = criarRng(seed == null ? (Date.now() & 0x7fffffff) : seed);
     this.mundo = mundo || M.gerarMundo(this.rng);
-    for (const r of this.mundo.regioes) if (r.apagaDia == null) r.apagaDia = 8 + Math.floor(this.rng() * 13);
+    for (const r of this.mundo.regioes) if (r.apagaDia == null) r.apagaDia = 6 + Math.floor(this.rng() * 11);
     this.jog = new Map();
     for (const p of personagens) this.jog.set(p.id, p);
     this.total = personagens.length;
@@ -46,20 +77,30 @@ class Jogo {
   }
 
   // ---------- utilidades ----------
+  // registra quanto fome/sede/energia subiu ou caiu no dia (para o resumo do jogador)
+  fluxar(p, antes, fn) {
+    if (fn) fn();
+    if (!p.fluxo) return;
+    for (const k of ['fome', 'sede', 'energia']) {
+      if (antes[k] == null) continue;
+      const d = p[k] - antes[k];
+      if (d > 0.01) p.fluxo[k][0] += d; else if (d < -0.01) p.fluxo[k][1] -= d;
+    }
+  }
   d20() { return 1 + Math.floor(this.rng() * 20); }
   entre(a, b) { return a + Math.floor(this.rng() * (b - a + 1)); }
   vivos() { return [...this.jog.values()].filter(p => p.vivo && !p.escapou); }
   tAbs(t) { return (this.rodada - 1) * T + t; }
-  dia(t) { return Math.floor(this.tAbs(t) / 4) + 1; }
+  dia(t) { return Math.floor(this.tAbs(t) / T) + 1; }
   reg(p) { return this.mundo.regioes[p.regiao]; }
   log(p, t, tipo, texto) {
     if (!p || !p.diario) return;
-    p.diario.push({ t, d: this.dia(t), per: REGRAS.PERIODOS[t % 4], tipo, texto });
+    p.diario.push({ t, d: this.dia(t), per: REGRAS.PERIODOS[t % T], tipo, texto });
   }
   pub(tipo, texto) { this.publico.push({ rodada: this.rodada, tipo, texto }); if (this.publico.length > 200) this.publico.shift(); }
   nome(id) { const p = this.jog.get(id); return p ? p.nome : '?'; }
   aliados(a, b) { return a.aliados.includes(b.id); }
-  emTregua(a, b) { return (a.tregua[b.id] || 0) >= this.rodada; }
+  emTregua(a, b) { const t = a.tregua[b.id]; return t != null && t >= this.rodada; }
   amigavel(a, b) { return this.aliados(a, b) || this.emTregua(a, b); }
   naRegiao(p, incluirEscondidos) { return this.vivos().filter(o => o.id !== p.id && o.regiao === p.regiao); }
   dormindoEm(p, t) { return (p.sono || []).some(iv => t + 0.5 >= iv.ini && t + 0.5 < iv.fim); }
@@ -111,7 +152,7 @@ class Jogo {
     vit.aliados = [];
     if (assassino) assassino.kills++;
     this.log(vit, t, 'morte', '💀 Você morreu: ' + causa + '.');
-    this.pub('morte', `💀 ${vit.nome} morreu — ${causa}. (Dia ${this.dia(t)}, ${REGRAS.PERIODOS[t % 4]})`);
+    this.pub('morte', `💀 ${vit.nome} morreu — ${causa}. (Dia ${this.dia(t)}, ${REGRAS.PERIODOS[t % T]})`);
     for (const o of this.vivos()) if (o.regiao === vit.regiao && o.id !== vit.id) this.log(o, t, 'morte', `💀 ${vit.nome} morreu aqui perto (${causa}).`);
   }
 
@@ -121,7 +162,7 @@ class Jogo {
     if (this.dormindoEm(obs, t)) return false;
     let c = 0.62 + (P.atr(obs, 'AST') - 6) * 0.05 + P.traco(obs, 'percepcao') * 0.04 + P.traco(obs, 'alerta') * 0.05;
     c -= (alvo.escondido ? 0.35 : 0) + P.traco(alvo, 'furtivo') * 0.05;
-    if (t % 4 >= 2) c -= 0.1;
+    if (t >= T - 1) c -= 0.1;
     if (this.dormindoEm(alvo, t)) c += 0.15;
     const lc = alvo.local && this.mundo.regioes[alvo.regiao].locais.find(x => x.id === alvo.local);
     if (lc && lc.dono === alvo.id && lc.trancado) c -= 0.35;
@@ -265,6 +306,7 @@ class Jogo {
     const alvos = this.vivos();
     for (const p of alvos) {
       p.diario = []; p.vistos = {}; p.emCombate = -1; p.sono = [];
+      p.fluxo = { ini: { fome: p.fome, sede: p.sede, energia: p.energia, pv: p.pv }, fome: [0, 0], sede: [0, 0], energia: [0, 0], pv: [0, 0] };
       const pa = P.calcPA(p, this.cfg);
       const ag = montarAgenda(p, pa, p.fila);
       ag.ordenados = ag.itens.slice().sort((x, y) => x.inicio - y.inicio || x.idx - y.idx);
@@ -278,7 +320,7 @@ class Jogo {
     }
     const ordem = alvos.slice();
     for (let t = 0; t < T; t++) {
-      if (t % 4 === 0) this.eventosDia(t);
+      if (t === 0) this.eventosDia(t);
       const sh = M.embaralhar(ordem, this.rng);
       for (const p of sh) {
         if (!p.vivo || p.escapou) continue;
@@ -292,10 +334,11 @@ class Jogo {
       this.encontros(t);
       this.armadilhasTurno(t);
       for (const p of this.vivos()) this.passarTurno(p, t);
-      if (t % 4 === 3) this.estragar(t);
+      if (t === T - 1) this.estragar(t);
       if (this.total > 1 && this.vivos().length <= 1) break;
     }
     // fim da rodada
+    for (const p of this.vivos()) this.resumoDoDia(p);
     for (const p of this.jog.values()) {
       if (!p.vivo || p.escapou) { p.hist.push({ rodada: this.rodada, entradas: p.diario }); p.diario = []; if (p.hist.length > 6) p.hist.shift(); continue; }
       p.fila = (p.proximaFila || []).map(a => Object.assign({}, a, { carregada: true }));
@@ -307,6 +350,20 @@ class Jogo {
     this.propostas = this.propostas.filter(pr => pr.estado === 'pendente' && pr.ate >= this.rodada + 1);
     this._presentes();
     this.verificarFim();
+  }
+
+  // texto simples que explica por que fome/sede/energia estão como estão
+  resumoDoDia(p) {
+    const f = p.fluxo; if (!f) return;
+    const linha = (nome, k, ganho, perda) => {
+      const ini = Math.round(f.ini[k]), fim = Math.round(p[k]);
+      const g = Math.round(f[k][0]), q = Math.round(f[k][1]);
+      return `${nome} ${ini} → ${fim}` + (g || q ? ` (${g ? ganho + ' +' + g : ''}${g && q ? ', ' : ''}${q ? perda + ' −' + q : ''})` : ' (sem mudança)');
+    };
+    const partes = [linha('🍖 Fome', 'fome', 'comeu', 'o dia gastou'), linha('💧 Sede', 'sede', 'bebeu', 'o dia gastou'), linha('⚡ Energia', 'energia', 'descansou', 'cansaço')];
+    const pv = Math.round(p.pv) - Math.round(f.ini.pv);
+    partes.push(`❤️ Vida ${Math.round(f.ini.pv)} → ${Math.round(p.pv)}${pv ? ' (' + (pv > 0 ? '+' : '') + pv + ')' : ''}`);
+    this.log(p, T - 1, 'resumo', partes.join('  ·  '));
   }
 
   verificarFim() {
@@ -331,7 +388,7 @@ class Jogo {
       const rs = M.embaralhar(this.mundo.regioes, this.rng).slice(0, 6);
       for (const r of rs) {
         r.fogueiraAte = 0;
-        for (const p of this.vivos()) if (p.regiao === r.id) { this.log(p, t, 'info', '🌧️ Uma chuva forte cai sobre a região, apaga fogueiras e dá para beber um pouco (sede +15).'); p.sede = clamp(p.sede + 15, 0, 100); }
+        for (const p of this.vivos()) if (p.regiao === r.id) { this.log(p, t, 'info', '🌧️ Uma chuva forte cai sobre a região, apaga fogueiras e dá para beber um pouco (sede +15).'); this.fluxar(p, { sede: p.sede }, () => { p.sede = clamp(p.sede + 15, 0, 100); }); }
       }
     }
     // apagão
@@ -342,7 +399,7 @@ class Jogo {
       }
     }
     for (const p of this.vivos()) {
-      if (this.mundo.regioes[p.regiao].neblina && t % 4 === 0) this.log(p, t, 'perigo', '🌫️ Você está dentro da névoa. O ar queima por dentro. Saia daqui.');
+      if (this.mundo.regioes[p.regiao].neblina && t === 0) this.log(p, t, 'perigo', '🌫️ Você está dentro da névoa. O ar queima por dentro. Saia daqui.');
       if (this.rng() < 0.06 && this.cfg.escape) this.log(p, t, 'sussurro', '🌀 ' + SUSSURROS[Math.floor(this.rng() * SUSSURROS.length)]);
     }
   }
@@ -350,9 +407,11 @@ class Jogo {
   passarTurno(p, t) {
     if (!p.vivo || p.escapou) return;
     const dorm = this.dormindoEm(p, t);
+    const f0 = { fome: p.fome, sede: p.sede, energia: p.energia, pv: p.pv };
     p.fome = clamp(p.fome - REGRAS.FOME_POR_TURNO * P.multTraco(p, 'fome') * (dorm ? 0.5 : 1), 0, 100);
     p.sede = clamp(p.sede - REGRAS.SEDE_POR_TURNO * P.multTraco(p, 'sede') * (dorm ? 0.6 : 1), 0, 100);
     p.energia = clamp(p.energia + (dorm ? REGRAS.ENERGIA_SONO * P.multTraco(p, 'sono') : -REGRAS.ENERGIA_POR_TURNO), 0, 100);
+    this.fluxar(p, f0);
     p.dor = Math.max(0, p.dor - 2.5);
     if (p.sangramento > 0) {
       this.dano(p, 2 * p.sangramento, 'sangramento (perdeu muito sangue)');
@@ -364,7 +423,7 @@ class Jogo {
     if (p.fome <= 0) this.dano(p, 3, 'fome');
     if (p.sede <= 0) this.dano(p, 5, 'sede');
     if (p.energia <= 0) this.dano(p, 2, 'exaustão');
-    const r0 = this.reg(p), temp = M.temperatura(r0, this.dia(t), t % 4);
+    const r0 = this.reg(p), temp = M.temperatura(r0, this.dia(t), t % T);
     let aque = 0;
     for (const sl in p.equip) { const it = infoItem(p.equip[sl]); if (it && it.frio) aque += it.frio / 6; }
     if (P.temItem(p, 'cobertor') || P.temItem(p, 'manta_termica')) aque += dorm ? 4 : 2;
@@ -374,7 +433,7 @@ class Jogo {
     const tinhaFrio = p.frio, tinhaCalor = p.calor;
     p.frio = 0; p.calor = 0;
     if (ef < 7) { p.frio = 1; this.dano(p, Math.min(3, (7 - ef) * 0.2), 'frio (hipotermia)'); p.energia = clamp(p.energia - 1, 0, 100); if (!tinhaFrio) this.log(p, t, 'perigo', `🥶 Está muito frio (${temp}°C). Agasalho, abrigo ou fogueira ajudam.`); }
-    else if (ef > 33) { p.calor = 1; p.sede = clamp(p.sede - 3, 0, 100); if (ef > 38) this.dano(p, 1.5, 'insolação'); if (!tinhaCalor) this.log(p, t, 'perigo', `🥵 Calor forte (${temp}°C). A sede aumenta. Procure sombra/abrigo.`); }
+    else if (ef > 33) { p.calor = 1; this.fluxar(p, { sede: p.sede }, () => { p.sede = clamp(p.sede - 3, 0, 100); }); if (ef > 38) this.dano(p, 1.5, 'insolação'); if (!tinhaCalor) this.log(p, t, 'perigo', `🥵 Calor forte (${temp}°C). A sede aumenta. Procure sombra/abrigo.`); }
     p.temp = temp;
     const r = this.reg(p);
     if (r.neblina) { this.dano(p, this.mundo.estagioNeblina >= 3 ? 2 : 1, 'consumido pela névoa'); p.energia = clamp(p.energia - 1, 0, 100); }
@@ -465,7 +524,7 @@ class Jogo {
   a_esperar(p, a, t) { /* nada */ }
   a_dormir(p, a, t) { this.log(p, t, 'info', '😴 Você dorme. Está vulnerável.'); }
   a_descansar(p, a, t) {
-    p.energia = clamp(p.energia + 30, 0, 100); p.pv = Math.min(p.pvMax, p.pv + 6); p.dor = Math.max(0, p.dor - 10); p.moral = clamp(p.moral + 2, 0, 100);
+    this.fluxar(p, { energia: p.energia }, () => { p.energia = clamp(p.energia + 30, 0, 100); }); p.pv = Math.min(p.pvMax, p.pv + 6); p.dor = Math.max(0, p.dor - 10); p.moral = clamp(p.moral + 2, 0, 100);
     this.log(p, t, 'info', '🛌 Você descansa um pouco. Energia e ânimo sobem.');
   }
 
@@ -532,7 +591,7 @@ class Jogo {
     if (it.req === 'abridor_ou_faca' && !this.tem(p, ABRE_LATA)) { this.log(p, t, 'info', `🥫 Você não tem como abrir ${it.nome}. Precisa de abridor ou faca.`); return; }
     P.tirar(p, id, 1);
     const u = it.uso, partes = [];
-    const add = (campo, v, nm) => { const antes = p[campo]; p[campo] = clamp(p[campo] + v, 0, 100); if (Math.round(p[campo] - antes)) partes.push(`${nm} ${v > 0 ? '+' : ''}${Math.round(p[campo] - antes)}`); };
+    const add = (campo, v, nm) => { const antes = p[campo]; p[campo] = clamp(p[campo] + v, 0, 100); this.fluxar(p, { [campo]: antes }); if (Math.round(p[campo] - antes)) partes.push(`${nm} ${v > 0 ? '+' : ''}${Math.round(p[campo] - antes)}`); };
     if (u.fome) add('fome', u.fome, 'fome');
     if (u.sede) add('sede', u.sede, 'sede');
     if (u.energia) add('energia', u.energia, 'energia');
@@ -704,7 +763,7 @@ class Jogo {
   }
   a_fogueira(p, a, t) {
     if (!this.tem(p, ISQUEIROS) || (p.inv.lenha || 0) < 2) { this.log(p, t, 'info', '🔥 Para fazer fogueira você precisa de isqueiro ou fósforos e 2 lenhas.'); return; }
-    P.tirar(p, 'lenha', 2); this.reg(p).fogueiraAte = this.tAbs(t) + 8;
+    P.tirar(p, 'lenha', 2); this.reg(p).fogueiraAte = this.tAbs(t) + 6;
     this.log(p, t, 'item', '🔥 Você acende uma fogueira. Ela dura cerca de 2 dias e chama atenção.');
   }
   a_cozinhar(p, a, t) {
@@ -736,7 +795,7 @@ class Jogo {
     if (!torneira && !lago) { this.log(p, t, 'info', predios.length ? '💧 A água encanada secou e não há lago por perto.' : '💧 Não há torneira nem lago nesta região.'); return; }
     let n = 0;
     const limpa = !!torneira;
-    if (limpa) { const antes = p.sede; p.sede = clamp(p.sede + 45, 0, 100); if (p.sede - antes >= 5) this.log(p, t, 'item', `🚰 Você bebe direto da torneira (sede +${Math.round(p.sede - antes)}).`); }
+    if (limpa) { const antes = p.sede; p.sede = clamp(p.sede + 45, 0, 100); this.fluxar(p, { sede: antes }); if (p.sede - antes >= 5) this.log(p, t, 'item', `🚰 Você bebe direto da torneira (sede +${Math.round(p.sede - antes)}).`); }
     if (P.temItem(p, 'cantil')) n += 2;
     for (const c of ['garrafa_vazia', 'garrafa_plastica']) { const q = Math.min(p.inv[c] || 0, Math.max(0, 3 - n)); if (q > 0) { P.tirar(p, c, q); n += q; } }
     if (!n) { if (!limpa) this.log(p, t, 'info', '💧 Você não tem garrafa vazia nem cantil para encher.'); return; }
@@ -873,6 +932,26 @@ class Jogo {
   }
   mensagem(p, texto) { (p.avisos = p.avisos || []).push({ rodada: this.rodada, texto }); if (p.avisos.length > 20) p.avisos.shift(); }
 
+  // ---------- o que o jogador PODE fazer agora (a tela só mostra isso) ----------
+  disponiveis(p) {
+    const r = this.reg(p), d = {};
+    const predios = r.locais.filter(l => LOCAIS[l.tipo].tipo === 'predio');
+    const lago = r.locais.some(l => l.tipo === 'lago');
+    d.agua = !!((predios.length && (this.rodada + 1) < r.apagaDia + 4) || lago);
+    d.aguaTipo = predios.length && (this.rodada + 1) < r.apagaDia + 4 ? 'torneira' : lago ? 'lago' : null;
+    d.pescar = !!(lago || r.tema === 'praia') && !!(this.tem(p, ['kit_pesca', 'rede_pesca']) || (P.temItem(p, 'vara_pesca') && P.temItem(p, 'anzol_linha')));
+    d.cacar = Object.keys(p.inv).map(infoItem).some(i => i && (i.tags.includes('arma_distancia') || i.tags.includes('arma_fogo')) && i.municao && (i.municao === 'pedra' ? P.temItem(p, 'pedra') : P.temItem(p, i.municao)));
+    d.fogueira = this.tem(p, ISQUEIROS) && (p.inv.lenha || 0) >= 2;
+    const fogoDisp = r.fogueiraAte > this.rodada * T || (this.tem(p, ISQUEIROS) && P.temItem(p, 'lenha')) || (predios.some(l => ['casa', 'apartamento', 'restaurante', 'fazenda', 'acampamento'].includes(l.tipo)) && r.luz !== false);
+    d.cozinhar = fogoDisp;
+    d.purificar = P.temItem(p, 'agua_rio') && (this.tem(p, ['pastilha_purificadora', 'purificador_agua']) || fogoDisp);
+    d.abrigo = P.temItem(p, 'lona') || ((p.inv.galho || 0) >= 4 && this.tem(p, ['pano', 'lencol', 'cobertor']));
+    d.barricar = predios.length > 0 && ((p.inv.tabua || 0) >= 2 || P.temItem(p, 'cadeado'));
+    d.tratar = this.tem(p, ['kit_medico', 'kit_primeiros_socorros']) || ['bandagem', 'atadura', 'curativo', 'gaze'].some(i => P.temItem(p, i));
+    d.recolher = r.armadilhas.some(x => x.dono === p.id && x.presa > 0);
+    return d;
+  }
+
   // ---------- o que cada jogador pode ver ----------
   visao(pid) {
     const p = this.jog.get(pid);
@@ -885,14 +964,14 @@ class Jogo {
       const it = infoItem(id) || {};
       const resta = it.estraga && p.frescor[id] ? Math.max(0, Math.ceil(diasAteEstragar(it) - (this.diaAtual() - p.frescor[id]))) : null;
       return { id, nome: it.nome || id, qtd: p.inv[id], peso: it.peso || 0, equipado: Object.values(p.equip).includes(id), slot: it.slot || null, dano: it.dano || null,
-        uso: it.uso || null, cozinha: !!it.cozinhar, efeito: it.efeito || null, risco: it.risco || 0, diasRestantes: resta, tags: it.tags || [] };
+        uso: it.uso || null, icone: iconeItem(id, it), cozinha: !!it.cozinhar, efeito: it.efeito || null, risco: it.risco || 0, diasRestantes: resta, tags: it.tags || [] };
     });
     const conhecido = (o) => ({ id: o.id, nome: o.nome, aliado: this.aliados(p, o), tregua: this.emTregua(p, o) });
     const viz = M.vizinhas(this.mundo, p.regiao);
     const propsPara = this.propostas.filter(x => x.para === pid && x.estado === 'pendente').map(x => ({ id: x.id, de: x.de, deNome: this.nome(x.de), tipo: x.tipo }));
     const propsDe = this.propostas.filter(x => x.de === pid && x.estado === 'pendente').map(x => ({ id: x.id, para: x.para, paraNome: this.nome(x.para), tipo: x.tipo }));
     return {
-      rodada: this.rodada, diaInicio: this.rodada * 3 + 1, fim: this.fim, resultado: this.resultado,
+      rodada: this.rodada, diaInicio: this.rodada + 1, fim: this.fim, resultado: this.resultado,
       voce: {
         id: p.id, nome: p.nome, classe: p.classe, classeNome: (P.CLASSES[p.classe] || {}).nome, descricao: p.descricao, atributos: p.atributos,
         atributosEfetivos: { FOR: P.atr(p, 'FOR'), AGI: P.atr(p, 'AGI'), AST: P.atr(p, 'AST'), CAR: P.atr(p, 'CAR') },
@@ -920,17 +999,17 @@ class Jogo {
       jogadores: [...this.jog.values()].map(o => ({ id: o.id, nome: o.nome, estado: o.escapou ? 'desaparecido' : o.vivo ? 'vivo' : 'morto', causa: o.vivo || o.escapou ? null : o.causa, aliado: this.aliados(p, o), classeNome: (P.CLASSES[o.classe] || {}).nome })),
       receitas: Object.keys(RECEITAS).map(k => ({ id: k, nome: RECEITAS[k].nome, custo: RECEITAS[k].custo, ing: Object.keys(RECEITAS[k].ing).map(i => nomeItem(i) + ' x' + RECEITAS[k].ing[i]).join(', '), ferr: RECEITAS[k].ferr.length > 0, pode: Object.keys(RECEITAS[k].ing).every(i => P.temItem(p, i, RECEITAS[k].ing[i])) && RECEITAS[k].ferr.every(tg => P.temTag(p, tg)) })),
       fila: p.fila, previa: ag.itens.map(i => ({ inicio: Math.round(i.inicio * 100) / 100, fim: Math.round(i.fim * 100) / 100, custo: Math.round(i.custo * 100) / 100, estado: i.estado })), usado: ag.usado,
-      postura: p.postura,
+      postura: p.postura, disp: vivo ? this.disponiveis(p) : {}, taxas: { fome: 25, sede: 34, energia: REGRAS.ENERGIA_POR_TURNO * T },
       propostasRecebidas: propsPara, propostasEnviadas: propsDe,
       historico: p.hist, avisos: p.avisos || [], publico: this.publico.slice(-40),
     };
   }
-  diaAtual() { return this.rodada * 3 + 1; }
+  diaAtual() { return this.rodada + 1; }
 
   // ---------- salvar / carregar ----------
   exportar() {
     return {
-      cfg: this.cfg, mundo: this.mundo, total: this.total, rodada: this.rodada, fim: this.fim, vencedor: this.vencedor, resultado: this.resultado,
+      versao: REGRAS.VERSAO, cfg: this.cfg, mundo: this.mundo, total: this.total, rodada: this.rodada, fim: this.fim, vencedor: this.vencedor, resultado: this.resultado,
       publico: this.publico, propostas: this.propostas, proxProp: this.proxProp,
       jog: [...this.jog.values()].map(p => { const c = Object.assign({}, p); delete c.agenda; delete c.proximaFila; return c; }),
     };

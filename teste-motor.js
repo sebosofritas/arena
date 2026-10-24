@@ -13,13 +13,13 @@ function bot(jogo, p, rng) {
   const alguem = () => { const o = jogo.vivos().filter(x => x.id !== p.id && x.regiao === p.regiao); return o.length ? o[Math.floor(rng() * o.length)].id : null; };
   const temUso = (campo) => Object.keys(p.inv).find(i => { const it = infoItem(i); return it && it.uso && it.uso[campo] > 0 && !it.risco && !(it.req); });
   const bebida = temUso('sede'), comida = temUso('fome');
-  for (let n = 0; n < 12; n++) {
+  for (let n = 0; n < 6; n++) {
     const r = rng();
     if (p.sede < 70 && bebida && p.inv[bebida]) f.push({ tipo: 'beber', item: bebida });
     if (p.fome < 60 && comida && p.inv[comida]) f.push({ tipo: 'comer', item: comida });
     if (r < 0.35) f.push({ tipo: 'vasculhar' });
     else if (r < 0.5) f.push({ tipo: ['norte', 'sul', 'leste', 'oeste'][Math.floor(rng() * 4)] ? 'mover' : 'mover', dir: ['norte', 'sul', 'leste', 'oeste'][Math.floor(rng() * 4)] });
-    else if (r < 0.58) f.push({ tipo: 'dormir', turnos: 2 });
+    else if (r < 0.58) f.push({ tipo: 'dormir', turnos: 1 });
     else if (r < 0.66) f.push({ tipo: 'observar' });
     else if (r < 0.72 && alguem()) f.push({ tipo: 'falar', alvo: alguem(), texto: 'oi' });
     else if (r < 0.78 && alguem()) f.push({ tipo: 'propor', alvo: alguem(), acordo: rng() < 0.5 ? 'tregua' : 'alianca' });
@@ -46,18 +46,18 @@ function botEsperto(jogo, p, rng) {
     for (const [id, it] of lista) { for (let k = 0; k < p.inv[id] && nivel < lim && n < 4; k++) { f.push({ tipo, item: id }); nivel += it.uso[campo]; n++; } }
   };
   usa('sede', 75, 'beber'); usa('fome', 70, 'comer');
-  for (const q of [0, 4, 8]) f.push({ tipo: 'coletar_agua', quando: q });
-  for (const q of [1, 5, 9]) if (jogo.tem(p, ['cantil', 'agua_garrafa'])) f.push({ tipo: 'beber', item: P.temItem(p, 'agua_garrafa') ? 'agua_garrafa' : 'agua_rio', quando: q });
+  f.push({ tipo: 'coletar_agua', quando: 0 });
+  for (const q of [1]) if (jogo.tem(p, ['cantil', 'agua_garrafa'])) f.push({ tipo: 'beber', item: P.temItem(p, 'agua_garrafa') ? 'agua_garrafa' : 'agua_rio', quando: q });
   const r = jogo.reg(p);
   if (r.neblina || (jogo.mundo.estagioNeblina && M.distCentro(jogo.mundo, r) >= 5 - jogo.mundo.estagioNeblina - 1)) {
     const cx = (jogo.mundo.N - 1) / 2;
     f.push({ tipo: 'mover', dir: p.regiao % jogo.mundo.N < cx ? 'leste' : p.regiao % jogo.mundo.N > cx ? 'oeste' : (Math.floor(p.regiao / jogo.mundo.N) < cx ? 'sul' : 'norte') });
   }
-  for (let n = 0; n < 5; n++) f.push({ tipo: 'vasculhar' });
+  for (let n = 0; n < 4; n++) f.push({ tipo: 'vasculhar' });
   if (r.locais.length && rng() < 0.5) f.push({ tipo: 'arrombar', local: r.locais[0].id });
   f.push({ tipo: 'vasculhar' });
   if (rng() < 0.5) f.push({ tipo: 'mover', dir: ['norte', 'sul', 'leste', 'oeste'][Math.floor(rng() * 4)] });
-  f.push({ tipo: 'dormir', turnos: 2, quando: 3 }); f.push({ tipo: 'dormir', turnos: 2, quando: 10 });
+  f.push({ tipo: 'dormir', turnos: 1, quando: 2 });
   return sanitizarFila(f, ids).fila;
 }
 const M = require('./jogo/mundo');
@@ -80,7 +80,7 @@ for (let seed = 1; seed <= N; seed++) {
   const jogo = new Jogo(jogadores, cfg, seed);
   let guarda = 0;
   try {
-    while (!jogo.fim && guarda++ < 60) {
+    while (!jogo.fim && guarda++ < 90) {
       for (const p of jogo.vivos()) {
         const f = ESPERTO ? botEsperto(jogo, p, rng) : bot(jogo, p, rng);
         p.fila = ESPERTO ? f : (p.fila || []).concat(f).slice(0, 40);
@@ -104,7 +104,7 @@ for (let seed = 1; seed <= N; seed++) {
 }
 const med = stats.rodadas.reduce((a, b) => a + b, 0) / stats.rodadas.length;
 console.log(`Partidas: ${N} | rodadas (média/min/max): ${med.toFixed(1)}/${Math.min(...stats.rodadas)}/${Math.max(...stats.rodadas)}`);
-console.log('Terminaram com resultado:', stats.vencedores, '| sem fim em 60 rodadas:', stats.cheios, '| mortes em combate (kills):', stats.kills);
+console.log('Terminaram com resultado:', stats.vencedores, '| sem fim em 90 rodadas:', stats.cheios, '| mortes em combate (kills):', stats.kills);
 console.log('Causas de morte:', stats.causas);
 console.log(stats.erros ? `${stats.erros} ERRO(S)` : 'Sem erros.');
 process.exit(stats.erros ? 1 : 0);

@@ -186,3 +186,21 @@ a comida fresca estragando. A Névoa pode ser parte do mistério do sumiço e do
 ### Ainda fora (sugestões)
 - Salvamento que sobrevive a "dormir/atualizar" no Render grátis (precisa de banco ou disco pago).
 - Sons, animações de combate no mapa, ícones de itens.
+
+## v0.6: um dia por rodada e tela refeita
+Pedido do dono do projeto: rodadas mais fáceis de entender, tela menos confusa.
+- **1 rodada = 1 dia**, com 3 períodos: ☀️ manhã, 🌤️ tarde, 🌙 noite (acabou a madrugada). `TURNOS = 3`.
+- Padrões novos: rodada de 2:00, 16 PA por dia (mínimo 7 se ferido), névoa a partir do dia 10 e avança a
+  cada 6 dias, trégua de 3 dias. Fome cai ~25/dia, sede ~34/dia, energia ~21/dia; dormir um período dá +28.
+- **Bug de fome e sede**: comer ou beber com a barra cheia não adianta (limite 100), e antes o efeito ficava
+  escondido no meio de 3 dias de desgaste. Agora a tela mostra a **previsão por período** (🍖💧⚡ ao fim de
+  manhã/tarde/noite), avisa quando comer/beber desperdiça e o diário traz **"Como foi seu dia"**
+  (ex.: Fome 100 → 79: comeu +0, o dia gastou −21).
+- **Tela nova**: vitais sempre no topo; "dock" de ícones (📅 dia, ⚡ ações, 🎒 mochila, 🛠️ fabricar, 📍 onde
+  estou, ❤️ corpo, 📖 diário, 💬 conversa, 📰 notícias, 👥 vivos). Todo painel abre e fecha (o mapa não).
+  Todas as ações ficam em **uma aba só (⚡ Ações)**, com ícones: Explorar, Ir, Sobreviver, Itens, Pessoas, Dormir.
+  O servidor diz o que o jogador *pode* fazer (`disp`), então só aparecem ações possíveis. **Fabricar** mostra
+  só receitas que dá para fazer com o que está na mochila.
+- Plano do dia: três cartões (manhã/tarde/noite). Escolhe-se o período, toca-se na ação, e ela entra ali.
+- Saves antigos (versão < 6) são ignorados ao ligar o servidor.
+- Corrigido: na rodada 0 todos apareciam "em trégua" uns com os outros.
