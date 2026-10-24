@@ -6,170 +6,607 @@
 <title>Arena de Sobrevivência</title>
 <style>
   :root {
-    --fundo: #0b0d10; --painel: #14181d; --borda: #243038;
-    --texto: #d8dee4; --suave: #8b98a3; --verde: #3fb950;
-    --azul: #4aa3ff; --vermelho: #f85149; --amarelo: #e3b341;
+    --fundo: #0b0d10; --painel: #14181d; --painel2: #1a2027; --borda: #243038;
+    --texto: #d8dee4; --suave: #8b98a3; --verde: #3fb950; --azul: #4aa3ff;
+    --vermelho: #f85149; --amarelo: #e3b341; --roxo: #b392f0; --laranja: #f0883e; --ciano: #56d4dd;
   }
   * { box-sizing: border-box; }
-  body {
-    margin: 0; min-height: 100vh; background: var(--fundo); color: var(--texto);
-    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
-    display: flex; align-items: center; justify-content: center; padding: 16px;
-  }
-  .caixa {
-    width: 100%; max-width: 480px; background: var(--painel);
-    border: 1px solid var(--borda); border-radius: 10px; padding: 24px;
-  }
+  body { margin: 0; min-height: 100vh; background: var(--fundo); color: var(--texto);
+    font-family: ui-monospace, "Cascadia Mono", Consolas, monospace; font-size: 14px; }
+  .centro { display: flex; align-items: center; justify-content: center; padding: 16px; min-height: 100vh; }
+  .caixa { width: 100%; max-width: 520px; background: var(--painel); border: 1px solid var(--borda); border-radius: 10px; padding: 22px; }
+  .caixa.larga { max-width: 980px; }
   h1 { margin: 0 0 4px; font-size: 22px; color: var(--azul); }
-  .sub { margin: 0 0 20px; color: var(--suave); font-size: 13px; }
-  label { display: block; margin: 14px 0 6px; font-size: 13px; color: var(--suave); }
-  input {
-    width: 100%; padding: 10px 12px; font: inherit; color: var(--texto);
-    background: var(--fundo); border: 1px solid var(--borda); border-radius: 6px;
-  }
-  input:focus { outline: 2px solid var(--azul); border-color: transparent; }
-  button {
-    width: 100%; margin-top: 12px; padding: 11px; font: inherit; font-weight: bold;
-    color: #fff; background: #1f6feb; border: 0; border-radius: 6px; cursor: pointer;
-  }
+  h2 { margin: 0 0 8px; font-size: 14px; color: var(--amarelo); text-transform: uppercase; letter-spacing: 1px; }
+  h3 { margin: 10px 0 6px; font-size: 13px; color: var(--azul); }
+  .sub { margin: 0 0 16px; color: var(--suave); font-size: 13px; }
+  label { display: block; margin: 12px 0 5px; font-size: 12px; color: var(--suave); }
+  input, select, textarea { width: 100%; padding: 8px 10px; font: inherit; color: var(--texto); background: var(--fundo); border: 1px solid var(--borda); border-radius: 6px; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--azul); border-color: transparent; }
+  textarea { resize: vertical; min-height: 54px; }
+  button { padding: 8px 12px; font: inherit; font-weight: bold; color: #fff; background: #1f6feb; border: 0; border-radius: 6px; cursor: pointer; }
   button:hover { background: #388bfd; }
   button.sec { background: transparent; border: 1px solid var(--borda); color: var(--suave); }
-  button.verde { background: #238636; }
-  button.verde:hover { background: #2ea043; }
-  button:disabled { opacity: .5; cursor: not-allowed; }
-  .ou { text-align: center; margin: 16px 0 0; color: var(--suave); font-size: 12px; }
-  .erro { color: var(--vermelho); font-size: 13px; min-height: 18px; margin-top: 10px; }
-  .codigo { font-size: 38px; letter-spacing: 8px; text-align: center; color: var(--amarelo); margin: 8px 0 2px; }
-  .dica { text-align: center; font-size: 12px; color: var(--suave); margin: 0 0 16px; }
-  ul { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--borda); }
-  li { display: flex; justify-content: space-between; padding: 9px 4px; border-bottom: 1px solid var(--borda); }
+  button.sec:hover { border-color: var(--azul); color: var(--texto); }
+  button.verde { background: #238636; } button.verde:hover { background: #2ea043; }
+  button.verm { background: #b62324; } button.verm:hover { background: #da3633; }
+  button.mini { padding: 3px 7px; font-size: 12px; font-weight: normal; background: #21262d; border: 1px solid var(--borda); color: var(--texto); }
+  button.mini:hover { border-color: var(--azul); background: #21262d; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .full { width: 100%; margin-top: 10px; }
+  .oculto { display: none !important; }
+  .erro { color: var(--vermelho); font-size: 13px; min-height: 18px; margin-top: 8px; }
+  .dica { color: var(--suave); font-size: 12px; }
+  .codigo { font-size: 38px; letter-spacing: 8px; text-align: center; color: var(--amarelo); margin: 6px 0 2px; }
   .tag { font-size: 11px; color: var(--amarelo); }
   .off { color: var(--suave); font-style: italic; }
-  .oculto { display: none; }
-  .aviso { text-align: center; padding: 20px 0; color: var(--suave); }
+  ul.lista { list-style: none; padding: 0; margin: 0; border-top: 1px solid var(--borda); }
+  ul.lista li { display: flex; justify-content: space-between; gap: 8px; padding: 7px 4px; border-bottom: 1px solid var(--borda); }
+  .rec { color: var(--verde); font-size: 11px; margin-left: 6px; }
+  .grade2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 760px) { .grade2 { grid-template-columns: 1fr; } }
+  .cfg { display: grid; grid-template-columns: 1fr 90px; gap: 6px 10px; align-items: center; }
+  .cfg .d { grid-column: 1 / -1; font-size: 11px; color: var(--suave); margin: -4px 0 4px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .card { border: 1px solid var(--borda); border-radius: 8px; padding: 8px; cursor: pointer; background: var(--painel2); }
+  .card:hover { border-color: var(--azul); } .card.sel { border-color: var(--verde); background: #12261a; }
+  .card b { display: block; color: var(--texto); } .card span { font-size: 11px; color: var(--suave); }
+  .atr { display: grid; grid-template-columns: 90px 1fr 28px; align-items: center; gap: 8px; margin: 5px 0; }
+  .barra { height: 10px; background: #0f1318; border: 1px solid var(--borda); border-radius: 5px; overflow: hidden; }
+  .barra i { display: block; height: 100%; background: var(--azul); }
+  .barra.pv i { background: var(--vermelho); } .barra.fome i { background: var(--laranja); } .barra.sede i { background: var(--ciano); }
+  .barra.en i { background: var(--amarelo); } .barra.mo i { background: var(--roxo); }
+  .mapa5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; }
+  .mundo-caixa { position: relative; width: 100%; aspect-ratio: 1 / 1; max-height: 78vh; border-radius: 8px; overflow: hidden; border: 1px solid var(--borda); background: #123a6e; }
+  .mundo-caixa canvas { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+  .mundo-caixa canvas:active { cursor: grabbing; }
+  .mundo-caixa.cheia { position: fixed; inset: 0; z-index: 1000; max-height: none; aspect-ratio: auto; border-radius: 0; border: 0; }
+  .mundo-botoes { position: absolute; top: 8px; right: 8px; display: flex; flex-direction: column; gap: 4px; }
+  .mundo-botoes button { width: 34px; height: 34px; padding: 0; font-size: 16px; background: rgba(13,17,23,.82); border: 1px solid rgba(255,255,255,.18); border-radius: 6px; color: #fff; }
+  .mundo-botoes button:hover { background: rgba(31,111,235,.9); }
+  .cel { aspect-ratio: 1; border: 1px solid var(--borda); border-radius: 6px; background: var(--painel2); display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 18px; position: relative; padding: 0; color: var(--texto); font-weight: normal; }
+  .cel small { font-size: 9px; color: var(--suave); }
+  .cel.eu { border-color: var(--verde); box-shadow: 0 0 0 2px var(--verde) inset; }
+  .cel.nev { background: #2a2f36; opacity: .75; }
+  .cel.viz { border-color: var(--azul); cursor: pointer; }
+  .cel.pista { outline: 2px dashed var(--roxo); }
+  .cel .mk { position: absolute; top: 1px; right: 3px; font-size: 11px; }
+
+  /* jogo */
+  #telaJogo { padding: 10px; max-width: 1500px; margin: 0 auto; }
+  .topo { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; background: var(--painel); border: 1px solid var(--borda); border-radius: 8px; padding: 10px 14px; margin-bottom: 10px; }
+  .topo .rod { font-size: 16px; color: var(--azul); font-weight: bold; }
+  .topo .tempo { font-size: 20px; color: var(--amarelo); font-weight: bold; min-width: 64px; }
+  .cols { display: grid; grid-template-columns: 290px minmax(0, 1fr) 360px; gap: 10px; align-items: start; }
+  @media (max-width: 1100px) { .cols { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 760px) { .cols { grid-template-columns: 1fr; } }
+  .pn { background: var(--painel); border: 1px solid var(--borda); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+  .linha { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 4px 0; border-bottom: 1px dashed #1d252c; }
+  .linha:last-child { border-bottom: 0; }
+  .nm { flex: 1; min-width: 0; } .nm small { color: var(--suave); display: block; }
+  .btns { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+  .est { display: inline-block; font-size: 11px; padding: 2px 6px; border-radius: 10px; background: #3a1d1d; color: #ffa198; margin: 2px 3px 2px 0; }
+  .est.bom { background: #12261a; color: #7ee787; }
+  .bar12 { position: relative; height: 26px; background: #0f1318; border: 1px solid var(--borda); border-radius: 5px; margin: 6px 0 2px;
+    background-image: repeating-linear-gradient(90deg, transparent 0, transparent calc(8.333% - 1px), #1d252c calc(8.333% - 1px), #1d252c 8.333%); }
+  .bar12 .seg { position: absolute; top: 2px; height: 20px; border-radius: 3px; background: #1f6feb; opacity: .85; font-size: 10px; overflow: hidden; white-space: nowrap; padding: 3px 3px; color: #fff; }
+  .bar12 .seg.continua { background: var(--laranja); } .bar12 .seg.adiado { background: #555; }
+  .rotulos { display: flex; justify-content: space-between; font-size: 10px; color: var(--suave); }
+  .acao { display: grid; grid-template-columns: 22px 1fr auto; gap: 6px; padding: 5px 0; border-bottom: 1px dashed #1d252c; align-items: center; }
+  .acao .c { color: var(--amarelo); font-size: 11px; }
+  .acao.adiado { opacity: .5; } .acao.continua { color: var(--laranja); }
+  .log { max-height: 340px; overflow-y: auto; font-size: 13px; line-height: 1.45; }
+  .log .e { padding: 3px 0; border-bottom: 1px dashed #1d252c; }
+  .log .w { color: var(--suave); font-size: 11px; margin-right: 5px; }
+  .t-combate { color: #ff8e88; } .t-morte { color: var(--vermelho); font-weight: bold; } .t-perigo { color: var(--laranja); }
+  .t-loot { color: #7ee787; } .t-sussurro { color: var(--roxo); font-style: italic; } .t-social { color: var(--azul); }
+  .t-fala { color: var(--ciano); } .t-item { color: #d2e68c; } .t-encontro { color: #79c0ff; } .t-info { color: var(--texto); }
+  .t-sistema { color: var(--suave); } .t-fim { color: var(--amarelo); font-weight: bold; }
+  .t-traicao { color: var(--vermelho); font-weight: bold; } .t-alianca, .t-tregua { color: var(--verde); } .t-neblina, .t-sinal { color: var(--roxo); } .t-desaparecido { color: var(--roxo); }
+  .chat { max-height: 180px; overflow-y: auto; font-size: 13px; margin-bottom: 6px; }
+  .chat div { padding: 2px 0; } .chat b { color: var(--azul); } .chat .alem { color: var(--suave); font-style: italic; }
+  .faixa { padding: 10px; border-radius: 8px; margin-bottom: 10px; text-align: center; }
+  .faixa.morto { background: #3a1d1d; border: 1px solid var(--vermelho); } .faixa.fim { background: #2b2410; border: 1px solid var(--amarelo); }
+  .prop { background: #12202e; border: 1px solid var(--azul); border-radius: 8px; padding: 8px; margin-bottom: 8px; }
+  table.res { width: 100%; border-collapse: collapse; font-size: 13px; } table.res td, table.res th { text-align: left; padding: 5px; border-bottom: 1px solid var(--borda); }
+  details summary { cursor: pointer; color: var(--suave); padding: 4px 0; }
+  .form { display: grid; gap: 6px; }
+  .form .l2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  #acordando { text-align: center; padding: 16px 0; color: var(--suave); }
+  .peq { font-size: 11px; color: var(--suave); }
 </style>
 </head>
 <body>
 
-<!-- TELA 1: ENTRADA -->
-<div class="caixa" id="telaEntrada">
+<!-- ENTRADA -->
+<div class="centro" id="telaEntrada"><div class="caixa">
   <h1>Arena de Sobrevivência</h1>
-  <p class="sub">Cada um por si. O objetivo é sobreviver.</p>
-
+  <p class="sub">Todos sumiram. Só vocês ficaram. O objetivo é sobreviver.</p>
   <label for="nome">Nome do seu personagem</label>
   <input id="nome" maxlength="16" placeholder="ex.: Wabi" autocomplete="off">
-
-  <button id="btnCriar">Criar nova sala</button>
-  <p class="ou">— ou entre numa sala existente —</p>
-
+  <button id="btnCriar" class="full">Criar nova sala</button>
+  <p class="dica" style="text-align:center;margin:14px 0 0">— ou entre numa sala existente —</p>
   <label for="codigo">Código da sala</label>
   <input id="codigo" maxlength="4" placeholder="ex.: XK4P" autocomplete="off" style="text-transform:uppercase">
-  <button id="btnEntrar" class="sec">Entrar na sala</button>
-
+  <button id="btnEntrar" class="sec full">Entrar na sala</button>
   <div class="erro" id="erroEntrada"></div>
-  <div class="aviso oculto" id="acordando">Acordando o mundo… pode levar até 1 minuto.</div>
-</div>
+  <div id="acordando" class="oculto">Acordando o mundo… pode levar até 1 minuto.</div>
+</div></div>
 
-<!-- TELA 2: LOBBY -->
-<div class="caixa oculto" id="telaLobby">
+<!-- LOBBY -->
+<div class="centro oculto" id="telaLobby"><div class="caixa larga">
   <h1>Sala de espera</h1>
   <div class="codigo" id="lobbyCodigo">----</div>
-  <p class="dica">Mande este código para os amigos entrarem.</p>
-
-  <ul id="listaJogadores"></ul>
-  <p class="dica" id="contagem" style="margin-top:12px"></p>
-
-  <button id="btnIniciar" class="verde oculto">Iniciar partida</button>
-  <p class="dica oculto" id="aguardandoHost">Aguardando o anfitrião iniciar…</p>
-  <button id="btnSair" class="sec">Sair da sala</button>
+  <p class="dica" style="text-align:center">Mande este código para os amigos entrarem.</p>
+  <div class="grade2">
+    <div>
+      <h2>Jogadores</h2>
+      <ul class="lista" id="listaJogadores"></ul>
+      <p class="dica" id="contagem" style="margin-top:8px"></p>
+      <h2 style="margin-top:14px">Conversa</h2>
+      <div class="chat" id="chatLobby"></div>
+      <input id="chatLobbyIn" maxlength="200" placeholder="Digite e aperte Enter" autocomplete="off">
+    </div>
+    <div>
+      <h2>Regras da partida <span class="dica" id="cfgQuem"></span></h2>
+      <div class="cfg" id="cfgBox"></div>
+      <button id="btnCfgPadrao" class="sec full oculto">Voltar tudo ao Recomendado</button>
+    </div>
+  </div>
+  <button id="btnIniciar" class="verde full oculto">Iniciar partida</button>
+  <p class="dica oculto" id="aguardandoHost" style="text-align:center">Aguardando o anfitrião iniciar…</p>
+  <button id="btnSair" class="sec full">Sair da sala</button>
   <div class="erro" id="erroLobby"></div>
-</div>
+</div></div>
 
-<!-- TELA 3: JOGO (provisória) -->
-<div class="caixa oculto" id="telaJogo">
-  <h1>A simulação começa!</h1>
-  <p class="sub">Boa sorte a todos.</p>
-  <p class="aviso">O motor do jogo (períodos, ações, combate) ainda está sendo construído.<br>
-  Por enquanto, a sala está funcionando e todo mundo conectou certinho. ✔</p>
-  <ul id="listaJogo"></ul>
+<!-- CRIAÇÃO -->
+<div class="centro oculto" id="telaCriacao"><div class="caixa larga">
+  <h1>Quem é você nesse mundo vazio?</h1>
+  <p class="sub">Tempo restante: <b id="criaTempo" style="color:var(--amarelo)">--</b> · <span id="criaProntos"></span></p>
+  <div class="grade2">
+    <div>
+      <h2>1. Classe</h2>
+      <div class="cards" id="criaClasses"></div>
+      <label for="criaDesc">2. Descrição (ex.: "forte, academia" ou "esperto, estuda muito" — influencia os atributos)</label>
+      <textarea id="criaDesc" maxlength="140" placeholder="Quem era você antes de tudo sumir?"></textarea>
+      <h2 style="margin-top:14px">3. Atributos</h2>
+      <div id="criaAtrs"></div>
+      <div id="criaTracos"></div>
+      <button id="btnRolar" class="sec full">🎲 Sortear atributos</button>
+      <p class="dica" id="criaRerolls"></p>
+    </div>
+    <div>
+      <h2>4. Onde você acorda?</h2>
+      <p class="dica" id="criaInicioDica"></p>
+      <canvas id="criaCv" class="mundo"></canvas>
+      <button id="btnInicioSorteio" class="sec full">🎲 Deixar o destino decidir</button>
+      <button id="btnCriaPronto" class="verde full">Estou pronto</button>
+      <h2 style="margin-top:14px">Conversa</h2>
+      <div class="chat" id="chatCria"></div>
+      <input id="chatCriaIn" maxlength="200" placeholder="Digite e aperte Enter" autocomplete="off">
+      <div class="erro" id="erroCria"></div>
+    </div>
+  </div>
+</div></div>
+
+<!-- JOGO -->
+<div class="oculto" id="telaJogo">
+  <div class="topo">
+    <span class="rod" id="jRodada"></span>
+    <span class="tempo" id="jTempo">--:--</span>
+    <span id="jProntos" class="dica"></span>
+    <span style="flex:1"></span>
+    <button id="btnPronto" class="verde">✔ Terminei o planejamento</button>
+    <button id="btnSairJogo" class="sec mini">Sair</button>
+  </div>
+  <div id="jFaixa"></div>
+  <div class="cols">
+    <!-- coluna esquerda: você -->
+    <div>
+      <div class="pn" id="jStatus"></div>
+      <div class="pn"><h2>Mochila <span class="peq" id="jPeso"></span></h2><div id="jInv"></div></div>
+      <div class="pn"><h2>Fabricar</h2><div id="jCraft"></div></div>
+    </div>
+    <!-- centro: mundo -->
+    <div>
+      <div class="pn"><h2>Mapa do mundo <span class="peq">arraste para mover · roda do mouse ou ＋/－ para zoom · ⛶ tela cheia</span></h2><canvas id="jMapaCv" class="mundo"></canvas><p class="dica" id="jMapaDica"></p></div>
+      <div class="pn" id="jPropostas"></div>
+      <div class="pn" id="jRegiao"></div>
+      <div class="pn"><h2>Diário</h2><div class="log" id="jDiario"></div></div>
+    </div>
+    <!-- direita: planejamento -->
+    <div>
+      <div class="pn" id="jPlano">
+        <h2>Seu plano para a rodada <span class="peq" id="jPA"></span></h2>
+        <div class="bar12" id="jBarra"></div>
+        <div class="rotulos"><span>Dia 1</span><span>Dia 2</span><span>Dia 3</span></div>
+        <div id="jFila" style="margin-top:8px"></div>
+        <label>Postura se alguém te encontrar</label>
+        <select id="jPostura"></select>
+        <details style="margin-top:8px" id="jAddBox"><summary>➕ Adicionar ação (completo)</summary>
+          <div class="form" id="jForm">
+            <select id="fTipo"></select>
+            <div id="fParams" class="form"></div>
+            <select id="fQuando"></select>
+            <button id="fAdd" type="button">Adicionar à fila</button>
+            <p class="dica" id="fDesc"></p>
+          </div>
+        </details>
+      </div>
+      <div class="pn"><h2>Conversa (quem estava aqui no início da rodada)</h2><div class="chat" id="chatJogo"></div>
+        <input id="chatJogoIn" maxlength="200" placeholder="Fale com quem está na região" autocomplete="off"></div>
+      <div class="pn"><h2>Notícias</h2><div class="log" id="jPublico" style="max-height:200px"></div></div>
+      <div class="pn"><h2>Sobreviventes</h2><div id="jJogadores"></div></div>
+    </div>
+  </div>
+  <div class="erro" id="erroJogo" style="padding:0 10px"></div>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
+<script src="/mapa.js"></script>
 <script>
-  const socket = io();
-  const $ = (id) => document.getElementById(id);
-  const telas = { entrada: $('telaEntrada'), lobby: $('telaLobby'), jogo: $('telaJogo') };
+const socket = io();
+const $ = (id) => document.getElementById(id);
+const esc = (t) => String(t == null ? '' : t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const PERIODOS = ['manhã', 'tarde', 'noite', 'madrugada'];
+const NOMES_ATR = { FOR: 'Força', AGI: 'Agilidade', AST: 'Astúcia', CAR: 'Carisma' };
+let E = null;            // último estado recebido
+let fimEm = null;        // quando o relógio chega a zero
+let salvoFila = null;    // evita reenviar a mesma fila
 
-  function mostrar(qual) {
-    for (const k in telas) telas[k].classList.toggle('oculto', k !== qual);
+// ---------- util ----------
+function telaAtiva(qual) {
+  for (const id of ['telaEntrada', 'telaLobby', 'telaCriacao', 'telaJogo']) $(id).classList.toggle('oculto', id !== qual);
+  mostrarErro('');
+}
+function mostrarErro(m) { for (const id of ['erroEntrada', 'erroLobby', 'erroCria', 'erroJogo']) $(id).textContent = m || ''; }
+function guardar(codigo, token) { try { localStorage.setItem('arena', JSON.stringify({ codigo, token })); } catch (e) {} }
+function esquecer() { try { localStorage.removeItem('arena'); } catch (e) {} }
+function lerSalvo() { try { return JSON.parse(localStorage.getItem('arena')); } catch (e) { return null; } }
+function mmss(ms) { const s = Math.max(0, Math.ceil(ms / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); }
+function rotuloTurno(t, base) { return `Dia ${base + Math.floor(t / 4)} · ${PERIODOS[Math.floor(t) % 4]}`; }
+function barra(cls, v, max) { return `<div class="barra ${cls}"><i style="width:${Math.max(0, Math.min(100, 100 * v / (max || 100)))}%"></i></div>`; }
+
+// ---------- entrada ----------
+$('btnCriar').onclick = () => { mostrarErro(''); socket.emit('criarSala', { nome: $('nome').value }); };
+$('btnEntrar').onclick = () => { mostrarErro(''); socket.emit('entrarSala', { codigo: $('codigo').value, nome: $('nome').value }); };
+$('btnSair').onclick = $('btnSairJogo').onclick = () => { if (E && E.fase !== 'lobby' && !confirm('Sair da partida? Seu personagem fica parado no mundo.')) return; socket.emit('sairSala'); };
+$('btnIniciar').onclick = () => socket.emit('iniciar');
+socket.on('erro', mostrarErro);
+socket.on('saiu', () => { esquecer(); E = null; telaAtiva('telaEntrada'); });
+socket.on('reconexaoFalhou', () => { esquecer(); E = null; telaAtiva('telaEntrada'); });
+socket.on('connect', () => { const s = lerSalvo(); if (s) socket.emit('reconectar', s); clearTimeout(tAcordar); $('acordando').classList.add('oculto'); });
+const tAcordar = setTimeout(() => { if (!socket.connected) $('acordando').classList.remove('oculto'); }, 3000);
+
+socket.on('estado', (s) => {
+  E = s; fimEm = s.restanteMs != null ? Date.now() + s.restanteMs : null;
+  guardar(s.codigo, s.voce.token);
+  mostrarErro('');
+  if (s.fase === 'lobby') { telaAtiva('telaLobby'); renderLobby(); }
+  else if (s.fase === 'criacao') { telaAtiva('telaCriacao'); renderCriacao(); }
+  else { telaAtiva('telaJogo'); renderJogo(); }
+});
+socket.on('chat', (m) => { if (E) { E.chat.push(m); if (E.chat.length > 80) E.chat.shift(); renderChats(); } });
+
+setInterval(() => {
+  const txt = fimEm ? mmss(fimEm - Date.now()) : '--:--';
+  $('criaTempo').textContent = txt; $('jTempo').textContent = txt;
+}, 400);
+
+// ---------- chat ----------
+function renderChats() {
+  if (!E) return;
+  const html = E.chat.map(m => `<div class="${m.canal === 'alem' ? 'alem' : ''}"><b>${esc(m.de)}</b>${m.canal === 'alem' ? ' (além)' : ''}: ${esc(m.texto)}</div>`).join('');
+  for (const id of ['chatLobby', 'chatCria', 'chatJogo']) { const el = $(id); const baixo = el.scrollTop + el.clientHeight >= el.scrollHeight - 30; el.innerHTML = html; if (baixo) el.scrollTop = el.scrollHeight; }
+}
+for (const id of ['chatLobbyIn', 'chatCriaIn', 'chatJogoIn']) $(id).addEventListener('keydown', (e) => { if (e.key === 'Enter' && e.target.value.trim()) { socket.emit('chat', e.target.value); e.target.value = ''; } });
+
+// ---------- lobby ----------
+function renderLobby() {
+  $('lobbyCodigo').textContent = E.codigo;
+  $('listaJogadores').innerHTML = E.jogadores.map(j => `<li><span class="${j.conectado ? '' : 'off'}">${esc(j.nome)}${j.id === E.voce.id ? ' (você)' : ''}</span><span class="tag">${j.host ? 'anfitrião' : (j.conectado ? '' : 'desconectado')}</span></li>`).join('');
+  $('contagem').textContent = `${E.jogadores.length} de ${E.max} jogadores (mínimo ${E.min})`;
+  $('btnIniciar').classList.toggle('oculto', !E.voce.host);
+  $('btnCfgPadrao').classList.toggle('oculto', !E.voce.host);
+  $('aguardandoHost').classList.toggle('oculto', E.voce.host);
+  $('cfgQuem').textContent = E.voce.host ? '(você é o anfitrião: pode mudar)' : '(só o anfitrião muda)';
+  const box = $('cfgBox');
+  if (!box.dataset.pronto) {
+    box.dataset.pronto = '1';
+    box.innerHTML = Object.keys(E.opcoes).map(k => { const o = E.opcoes[k];
+      return `<label style="margin:0">${esc(o.nome)}<span class="rec" id="rec_${k}"></span></label><input type="number" data-k="${k}" min="${o.min}" max="${o.max}" step="${o.passo}"><div class="d">${esc(o.dica)}</div>`; }).join('');
+    box.querySelectorAll('input').forEach(inp => inp.addEventListener('change', () => socket.emit('configurar', { [inp.dataset.k]: Number(inp.value) })));
   }
-  function guardar(codigo, token) {
-    try { localStorage.setItem('arena', JSON.stringify({ codigo, token })); } catch (e) {}
+  box.querySelectorAll('input').forEach(inp => {
+    const k = inp.dataset.k;
+    inp.disabled = !E.voce.host;
+    if (document.activeElement !== inp) inp.value = E.cfg[k];
+    $('rec_' + k).textContent = E.cfg[k] === E.opcoes[k].padrao ? '✓ Recomendado' : `(recomendado: ${E.opcoes[k].padrao})`;
+    $('rec_' + k).style.color = E.cfg[k] === E.opcoes[k].padrao ? 'var(--verde)' : 'var(--amarelo)';
+  });
+  renderChats();
+}
+$('btnCfgPadrao').onclick = () => { const d = {}; for (const k in E.opcoes) d[k] = E.opcoes[k].padrao; socket.emit('configurar', d); };
+
+// ---------- criação ----------
+const cvCria = criarMundoCanvas($('criaCv'), { dicaClique: 'Clique para começar aqui', onClick: (id) => { if (E && E.criacao && E.criacao.inicioLivre && !E.criacao.pronto) socket.emit('criar:atualizar', { inicio: id }); } });
+let timerDesc = null;
+function renderCriacao() {
+  const c = E.criacao;
+  $('criaProntos').textContent = `Prontos: ${E.jogadores.filter(j => j.pronto).length}/${E.jogadores.length}`;
+  $('criaClasses').innerHTML = c.classes.map(k => `<div class="card ${k.id === c.classe ? 'sel' : ''}" data-c="${k.id}"><b>${esc(k.nome)}</b><span>${esc(k.desc)}</span></div>`).join('');
+  $('criaClasses').querySelectorAll('.card').forEach(el => el.onclick = () => { if (!c.pronto) socket.emit('criar:atualizar', { classe: el.dataset.c }); });
+  if (document.activeElement !== $('criaDesc')) $('criaDesc').value = c.descricao;
+  $('criaDesc').disabled = c.pronto;
+  $('criaAtrs').innerHTML = c.atributos ? Object.keys(NOMES_ATR).map(k => `<div class="atr"><span>${NOMES_ATR[k]}</span>${barra('', c.atributos[k], 10)}<b>${c.atributos[k]}</b></div>`).join('') : '<p class="dica">Ainda não sorteado. Aperte o botão abaixo (o primeiro sorteio é grátis).</p>';
+  $('criaTracos').innerHTML = c.tracos.length ? c.tracos.map(t => `<span class="est bom" title="${esc(t.desc)}">${esc(t.nome)}</span> <span class="peq">${esc(t.desc)}</span><br>`).join('') : '';
+  $('btnRolar').textContent = c.rolou ? '🎲 Sortear de novo' : '🎲 Sortear atributos';
+  $('btnRolar').disabled = c.pronto || (c.rolou && c.rerolagensRestantes <= 0);
+  $('criaRerolls').textContent = c.rolou ? `Re-rolagens restantes: ${c.rerolagensRestantes}` : '';
+  $('criaInicioDica').textContent = c.inicioLivre ? 'Clique na região onde quer começar. Cada uma tem locais diferentes.' : 'O anfitrião deixou o ponto de partida sortear.';
+  cvCria.atualizar({ seed: c.seed, N: c.N, regioes: c.mapa.map(r => ({ id: r.id, x: r.x, y: r.y, tema: r.tema, nome: r.nome, icone: r.icone, marcos: r.marcos, luz: true, neblina: false })), eu: null, escolha: c.inicio, pista: null });
+  $('btnInicioSorteio').classList.toggle('oculto', !c.inicioLivre);
+  $('btnInicioSorteio').disabled = c.pronto;
+  $('btnCriaPronto').textContent = c.pronto ? '↩ Desmarcar (quero mudar algo)' : '✔ Estou pronto';
+  $('btnCriaPronto').className = c.pronto ? 'sec full' : 'verde full';
+  renderChats();
+}
+$('criaDesc').addEventListener('input', () => { clearTimeout(timerDesc); timerDesc = setTimeout(() => socket.emit('criar:atualizar', { descricao: $('criaDesc').value }), 450); });
+$('btnRolar').onclick = () => socket.emit('criar:rolar');
+$('btnInicioSorteio').onclick = () => socket.emit('criar:atualizar', { inicio: 'sorteio' });
+$('btnCriaPronto').onclick = () => socket.emit('criar:pronto', !E.criacao.pronto);
+
+// ---------- jogo: fila de ações ----------
+function J() { return E.jogo; }
+function novaFila(f) { socket.emit('fila', { fila: f, postura: $('jPostura').value }); }
+function limpaAcao(a) { const o = {}; for (const k of ['tipo', 'dir', 'local', 'alvo', 'item', 'qtd', 'texto', 'turnos', 'quando', 'restante']) if (a[k] != null) o[k] = a[k]; const ac = a.acordo || a.tipoAcordo; if (ac) o.acordo = ac; return o; }
+function enviarAcoes(fila) { socket.emit('fila', { fila: fila.map(limpaAcao), postura: $('jPostura').value }); }
+function addAcao(a) {
+  if (J().pronto) return mostrarErro('Desmarque "terminei o planejamento" para editar.');
+  enviarAcoes(J().fila.concat([a]));
+}
+function remAcao(i) { const f = J().fila.slice(); f.splice(i, 1); enviarAcoes(f); }
+function moveAcao(i, d) { const f = J().fila.slice(); const j = i + d; if (j < 0 || j >= f.length) return; [f[i], f[j]] = [f[j], f[i]]; enviarAcoes(f); }
+$('jPostura').onchange = () => socket.emit('postura', $('jPostura').value);
+$('btnPronto').onclick = () => socket.emit('pronto', !J().pronto);
+$('btnPronto').dataset.x = '';
+
+function descAcao(a) {
+  const cat = J().catalogo[a.tipo] || { nome: a.tipo };
+  const v = J(); const nomeJog = (id) => (v.jogadores.find(x => x.id === id) || {}).nome || '?';
+  const nomeItem = (id) => { const i = v.inventario.find(x => x.id === id) || v.regiao.chao.find(x => x.id === id); return i ? i.nome : id; };
+  let t = cat.nome;
+  if (a.dir) t += ' → ' + a.dir;
+  if (a.local) { const l = v.regiao.locais.find(x => x.id === a.local); t += ' (' + (l ? l.nome : 'local') + ')'; }
+  if (a.alvo) t += ' · ' + nomeJog(a.alvo);
+  if (a.item) t += ' · ' + nomeItem(a.item) + (a.qtd > 1 ? ' x' + a.qtd : '');
+  if (a.tipoAcordo) t = (a.tipoAcordo === 'alianca' ? 'Propor ALIANÇA' : 'Propor TRÉGUA') + ' · ' + nomeJog(a.alvo);
+  if (a.receita) { const r = v.receitas.find(x => x.id === a.receita); t += ' · ' + (r ? r.nome : a.receita); }
+  if (a.texto) t += ': “' + a.texto + '”';
+  if (a.turnos) t += ' (' + a.turnos + ' período' + (a.turnos > 1 ? 's' : '') + ')';
+  return t;
+}
+
+function renderFila() {
+  const v = J(), base = v.diaInicio, dead = !v.voce.vivo || v.voce.escapou;
+  $('jPA').textContent = `PA: ${v.usado.toFixed(1).replace('.0', '')}/${v.voce.pa}${v.voce.pa < v.voce.paBase ? ' (reduzido de ' + v.voce.paBase + ')' : ''}`;
+  $('jBarra').innerHTML = v.fila.map((a, i) => { const p = v.previa[i]; if (!p || p.inicio >= 12) return '';
+    const w = Math.max(1.5, 100 * (Math.min(12, p.fim) - p.inicio) / 12);
+    return `<div class="seg ${p.estado}" style="left:${100 * p.inicio / 12}%;width:${w}%" title="${esc(descAcao(a))}">${i + 1}</div>`; }).join('');
+  $('jFila').innerHTML = v.fila.length ? v.fila.map((a, i) => { const p = v.previa[i] || {};
+    const qd = p.estado === 'adiado' ? 'não cabe — fica para a próxima rodada' : p.estado === 'continua' ? 'termina na próxima rodada' : rotuloTurno(p.inicio, base);
+    return `<div class="acao ${p.estado || ''}"><span class="c">${i + 1}</span><div><div>${esc(descAcao(a))}${a.carregada ? ' <span class="tag">(sobrou da rodada anterior)</span>' : ''}</div><div class="peq">${esc(qd)} · custo ${p.custo != null ? p.custo : '?'} PA${a.quando != null ? ' · marcada para ' + rotuloTurno(a.quando, base) : ''}</div></div>
+      <div class="btns">${dead ? '' : `<button class="mini" data-m="${i}" data-d="-1">↑</button><button class="mini" data-m="${i}" data-d="1">↓</button><button class="mini" data-r="${i}">✕</button>`}</div></div>`; }).join('')
+    : '<p class="dica">Nada planejado ainda. Use os botões nos cards ao lado, ou "Adicionar ação". Você pode deixar tempo livre.</p>';
+  $('jFila').querySelectorAll('[data-r]').forEach(b => b.onclick = () => remAcao(Number(b.dataset.r)));
+  $('jFila').querySelectorAll('[data-m]').forEach(b => b.onclick = () => moveAcao(Number(b.dataset.m), Number(b.dataset.d)));
+  // avisos de fome/sede ao enviar
+  const av = [];
+  const consome = (campo) => v.fila.some(a => (a.tipo === 'comer' && campo === 'fome') || (a.tipo === 'beber' && campo === 'sede') || (a.tipo === 'coletar_agua' && campo === 'sede'));
+  if (v.voce.vivo && !v.voce.escapou) {
+    if (!consome('sede') && v.voce.sede < 100) av.push('⚠️ Você não planejou beber nada: vai passar sede nesta rodada.');
+    if (!consome('fome')) av.push('⚠️ Você não planejou comer: vai passar fome nesta rodada.');
+    if (!v.fila.some(a => a.tipo === 'dormir' || a.tipo === 'descansar') && v.voce.energia < 70) av.push('⚠️ Você não planejou dormir: o cansaço vai pesar.');
   }
-  function esquecer() { try { localStorage.removeItem('arena'); } catch (e) {} }
-  function lerSalvo() {
-    try { return JSON.parse(localStorage.getItem('arena')); } catch (e) { return null; }
+  $('jFila').insertAdjacentHTML('beforeend', av.map(x => `<p class="peq" style="color:var(--laranja)">${x}</p>`).join(''));
+}
+
+// ---------- jogo: formulário completo ----------
+const PARAMS_HTML = {
+  dir: () => `<select data-p="dir"><option value="norte">Norte</option><option value="sul">Sul</option><option value="leste">Leste</option><option value="oeste">Oeste</option></select>`,
+  local: (opt) => `<select data-p="local">${opt ? '<option value="">(qualquer local)</option>' : ''}${J().regiao.locais.map(l => `<option value="${esc(l.id)}">${esc(l.nome)}</option>`).join('')}</select>`,
+  alvo: () => { const l = (J().jogadores).filter(x => x.id !== J().voce.id && x.estado === 'vivo'); return `<select data-p="alvo">${l.map(x => `<option value="${x.id}">${esc(x.nome)}</option>`).join('')}</select>`; },
+  item: (t) => { const lista = itensPara(t); return `<select data-p="item">${lista.map(i => `<option value="${esc(i.id)}">${esc(i.nome)}${i.qtd ? ' x' + i.qtd : ''}</option>`).join('')}</select>`; },
+  qtd: () => `<input data-p="qtd" type="number" min="1" max="99" value="1" placeholder="quantidade">`,
+  texto: () => `<input data-p="texto" maxlength="140" placeholder="O que dizer? (até 140 letras)">`,
+  receita: () => `<select data-p="receita">${J().receitas.map(r => `<option value="${r.id}">${esc(r.nome)} (${esc(r.ing)})</option>`).join('')}</select>`,
+  turnos: () => `<select data-p="turnos">${[1, 2, 3, 4, 5, 6, 8, 12].map(n => `<option value="${n}">${n} período${n > 1 ? 's' : ''}</option>`).join('')}</select>`,
+  acordo: () => `<select data-p="acordo"><option value="tregua">Trégua (5 PA)</option><option value="alianca">Aliança (6 PA)</option></select>`,
+};
+function itensPara(t) {
+  const inv = J().inventario;
+  if (t === 'comer') return inv.filter(i => i.uso && i.uso.fome > 0);
+  if (t === 'beber') return inv.filter(i => i.uso && i.uso.sede > 0);
+  if (t === 'usar') return inv.filter(i => i.uso);
+  if (t === 'equipar') return inv.filter(i => i.slot || i.dano);
+  if (t === 'cozinhar') return inv.filter(i => i.cozinha);
+  if (t === 'armar_armadilha') return inv.filter(i => i.tags.includes('armadilha'));
+  if (t === 'pegar_chao') return J().regiao.chao;
+  return inv;
+}
+let formTipo = null, formSig = '';
+function renderForm() {
+  const v = J(), cat = v.catalogo;
+  const dead = !v.voce.vivo || v.voce.escapou;
+  $('jAddBox').classList.toggle('oculto', dead);
+  const tipos = Object.keys(cat).filter(k => !cat[k].oculta || (k === 'escapar' && v.voce.podeEscapar));
+  const sig = tipos.join() + '|' + v.voce.podeEscapar;
+  if ($('fTipo').dataset.sig !== sig) {
+    const grupos = {};
+    for (const k of tipos) (grupos[cat[k].grupo] = grupos[cat[k].grupo] || []).push(k);
+    $('fTipo').innerHTML = Object.keys(grupos).map(g => `<optgroup label="${esc(g)}">${grupos[g].map(k => `<option value="${k}">${esc(k === 'escapar' ? '✨ Atravessar' : cat[k].nome)} (${k === 'propor' ? '5-6' : cat[k].custo} PA)</option>`).join('')}</optgroup>`).join('');
+    $('fTipo').dataset.sig = sig;
+    $('fQuando').innerHTML = '<option value="">Quando der (na ordem)</option>' + [0, 1, 2].map(d => PERIODOS.map((p, i) => `<option value="${d * 4 + i}">Dia ${d + 1} · ${p}</option>`).join('')).join('');
   }
-  function mostrarErro(msg) {
-    $('erroEntrada').textContent = msg;
-    $('erroLobby').textContent = msg;
+  const tipo = $('fTipo').value;
+  const novaSig = tipo + '|' + v.regiao.id + '|' + v.receitas.length + '|' + v.inventario.length + '|' + v.regiao.chao.length + '|' + v.jogadores.length;
+  if (novaSig !== formSig) {
+    formSig = novaSig;
+    const guardado = {}; $('fParams').querySelectorAll('[data-p]').forEach(el => guardado[el.dataset.p] = el.value);
+    const ps = (cat[tipo] || { p: [] }).p;
+    $('fParams').innerHTML = ps.map(p => { const opt = p.endsWith('?'), k = p.replace('?', ''); return PARAMS_HTML[k] ? PARAMS_HTML[k](k === 'item' ? tipo : opt) : ''; }).join('');
+    $('fParams').querySelectorAll('[data-p]').forEach(el => { if (guardado[el.dataset.p] != null && [...(el.options || [])].some(o => o.value === guardado[el.dataset.p]) || (el.tagName === 'INPUT' && guardado[el.dataset.p])) el.value = guardado[el.dataset.p]; });
+    $('fDesc').textContent = (cat[tipo] || {}).desc || '';
   }
+}
+$('fTipo').onchange = () => { formSig = ''; renderForm(); };
+$('fAdd').onclick = () => {
+  const tipo = $('fTipo').value, a = { tipo };
+  $('fParams').querySelectorAll('[data-p]').forEach(el => { if (el.value !== '') a[el.dataset.p] = el.tagName === 'INPUT' && el.type === 'number' ? Number(el.value) : el.value; });
+  if ($('fQuando').value !== '') a.quando = Number($('fQuando').value);
+  if (a.turnos) a.turnos = Number(a.turnos);
+  addAcao(a);
+  const t = $('fParams').querySelector('input[data-p=texto]'); if (t) t.value = '';
+};
+function preencher(tipo, params) {
+  $('jAddBox').open = true; $('fTipo').value = tipo; formSig = ''; renderForm();
+  for (const k in params) { const el = $('fParams').querySelector(`[data-p=${k}]`); if (el) el.value = params[k]; }
+  const f = $('fParams').querySelector('input[data-p=texto]'); if (f) f.focus();
+  $('jAddBox').scrollIntoView({ block: 'nearest' });
+}
 
-  // ----- Botões -----
-  $('btnCriar').onclick = () => {
-    mostrarErro('');
-    socket.emit('criarSala', { nome: $('nome').value });
-  };
-  $('btnEntrar').onclick = () => {
-    mostrarErro('');
-    socket.emit('entrarSala', { codigo: $('codigo').value, nome: $('nome').value });
-  };
-  $('btnIniciar').onclick = () => socket.emit('iniciarPartida');
-  $('btnSair').onclick = () => socket.emit('sairSala');
-
-  // ----- Respostas do servidor -----
-  socket.on('sala', (s) => {
-    mostrarErro('');
-    guardar(s.codigo, s.voce.token);
-    $('acordando').classList.add('oculto');
-
-    const itens = s.jogadores.map(j =>
-      `<li><span class="${j.conectado ? '' : 'off'}">${escapar(j.nome)}${j.nome === s.voce.nome ? ' (você)' : ''}</span>` +
-      `<span class="tag">${j.host ? 'anfitrião' : (j.conectado ? '' : 'desconectado')}</span></li>`
-    ).join('');
-
-    if (s.fase === 'lobby') {
-      $('lobbyCodigo').textContent = s.codigo;
-      $('listaJogadores').innerHTML = itens;
-      $('contagem').textContent = `${s.jogadores.length} de ${s.max} jogadores`;
-      $('btnIniciar').classList.toggle('oculto', !s.voce.eHost);
-      $('aguardandoHost').classList.toggle('oculto', s.voce.eHost);
-      mostrar('lobby');
-    } else {
-      $('listaJogo').innerHTML = itens;
-      mostrar('jogo');
+// ---------- jogo: painéis ----------
+function renderStatus() {
+  const v = J(), me = v.voce;
+  const est = me.estados.map(e => `<span class="est">${esc(e)}</span>`).join('') || '<span class="est bom">Em boa forma</span>';
+  $('jStatus').innerHTML = `<h2>${esc(me.nome)} <span class="peq">${esc(me.classeNome || '')}</span></h2>
+    <div class="atr" style="grid-template-columns:64px 1fr 56px"><span>PV</span>${barra('pv', me.pv, me.pvMax)}<b>${me.pv}/${me.pvMax}</b></div>
+    <div class="atr" style="grid-template-columns:64px 1fr 56px"><span>Fome</span>${barra('fome', me.fome)}<b>${me.fome}</b></div>
+    <div class="atr" style="grid-template-columns:64px 1fr 56px"><span>Sede</span>${barra('sede', me.sede)}<b>${me.sede}</b></div>
+    <div class="atr" style="grid-template-columns:64px 1fr 56px"><span>Energia</span>${barra('en', me.energia)}<b>${me.energia}</b></div>
+    <div class="atr" style="grid-template-columns:64px 1fr 56px"><span>Ânimo</span>${barra('mo', me.moral)}<b>${me.moral}</b></div>
+    <div style="margin:6px 0">${est}</div>
+    <div class="peq">Dor ${me.dor} · Proteção ${me.protecao} · PA ${me.pa}/${me.paBase}${me.sangramento ? ' · 🩸 sangrando' : ''}${me.infeccao ? ' · infecção ' + me.infeccao : ''}${me.escondido ? ' · 🫥 escondido' : ''}</div>
+    <details><summary>Atributos e traços</summary>
+      ${Object.keys(NOMES_ATR).map(k => `<div class="atr"><span>${NOMES_ATR[k]}</span>${barra('', me.atributosEfetivos[k], 10)}<b>${me.atributosEfetivos[k]}${me.atributosEfetivos[k] !== me.atributos[k] ? '<span class="peq">/' + me.atributos[k] + '</span>' : ''}</b></div>`).join('')}
+      ${me.tracos.map(t => `<div class="peq"><b style="color:var(--verde)">${esc(t.nome)}</b>: ${esc(t.desc)}</div>`).join('')}
+      <div class="peq">Fragmentos de mapa: ${me.fragmentos}</div></details>`;
+}
+function resumoUso(i) {
+  const u = i.uso; if (!u) return '';
+  const p = [];
+  for (const k of ['fome', 'sede', 'energia', 'moral', 'pv']) if (u[k]) p.push(`${{ fome: 'fome', sede: 'sede', energia: 'energia', moral: 'ânimo', pv: 'PV' }[k]} +${u[k]}`);
+  for (const k of ['dor', 'infeccao']) if (typeof u[k] === 'number') p.push(`${k === 'dor' ? 'dor' : 'infecção'} ${u[k]}`);
+  if (typeof u.sangramento === 'string') p.push('estanca sangue');
+  if (u.fratura) p.push('imobiliza osso');
+  return p.join(', ');
+}
+function renderInv() {
+  const v = J(), dead = !v.voce.vivo || v.voce.escapou;
+  $('jPeso').textContent = `(${v.voce.peso}/${v.voce.capacidade} kg)`;
+  const inv = v.inventario.slice().sort((a, b) => a.nome.localeCompare(b.nome));
+  $('jInv').innerHTML = inv.length ? inv.map(i => {
+    const b = [];
+    if (!dead) {
+      if (i.uso && i.uso.fome > 0) b.push(['comer', 'Comer']); else if (i.uso && i.uso.sede > 0) b.push(['beber', 'Beber']); else if (i.uso) b.push(['usar', 'Usar']);
+      if (i.slot || i.dano) b.push(['equipar', i.equipado ? 'Equipado' : 'Equipar']);
+      if (i.cozinha) b.push(['cozinhar', 'Cozinhar']);
+      if (i.tags.includes('armadilha')) b.push(['armar_armadilha', 'Armar']);
+      b.push(['largar', 'Largar']);
     }
-  });
-
-  socket.on('erro', mostrarErro);
-  socket.on('saiu', () => { esquecer(); mostrar('entrada'); });
-  socket.on('reconexaoFalhou', () => { esquecer(); mostrar('entrada'); });
-
-  // Ao (re)conectar, tenta voltar para o personagem anterior
-  socket.on('connect', () => {
-    const salvo = lerSalvo();
-    if (salvo) socket.emit('reconectar', salvo);
-  });
-
-  // Mensagem de "acordando" se o servidor demorar a responder
-  const timerAcordar = setTimeout(() => {
-    if (!socket.connected) $('acordando').classList.remove('oculto');
-  }, 3000);
-  socket.on('connect', () => { clearTimeout(timerAcordar); $('acordando').classList.add('oculto'); });
-
-  function escapar(t) {
-    return String(t).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  }
+    return `<div class="linha"><div class="nm">${esc(i.nome)} <b>x${i.qtd}</b>${i.equipado ? ' <span class="tag">equipado</span>' : ''}<small>${esc(resumoUso(i))}${i.dano ? (i.uso ? ' · ' : '') + 'dano ' + i.dano[0] + '-' + i.dano[1] : ''}${i.diasRestantes != null ? ' · estraga em ~' + i.diasRestantes + ' dia(s)' : ''}${i.risco ? ' · risco de passar mal' : ''}</small></div>
+      <div class="btns">${b.map(x => `<button class="mini" data-t="${x[0]}" data-i="${esc(i.id)}">${x[1]}</button>`).join('')}</div></div>`; }).join('') : '<p class="dica">Mochila vazia.</p>';
+  $('jInv').querySelectorAll('[data-t]').forEach(b => b.onclick = () => { const a = { tipo: b.dataset.t, item: b.dataset.i }; if (a.tipo === 'largar') a.qtd = 1; addAcao(a); });
+}
+function renderCraft() {
+  const v = J(), dead = !v.voce.vivo || v.voce.escapou;
+  $('jCraft').innerHTML = v.receitas.map(r => `<div class="linha"><div class="nm">${esc(r.nome)}<small>${esc(r.ing)}${r.ferr ? ' · precisa de lâmina' : ''} · ${r.custo} PA</small></div><div class="btns"><button class="mini" data-fab="${r.id}" ${(dead || !r.pode) ? 'disabled' : ''}>Fabricar</button></div></div>`).join('');
+  $('jCraft').querySelectorAll('[data-fab]').forEach(b => b.onclick = () => addAcao({ tipo: 'fabricar', receita: b.dataset.fab }));
+}
+function renderRegiao() {
+  const v = J(), r = v.regiao, dead = !v.voce.vivo || v.voce.escapou;
+  const dirs = { norte: '↑ Norte', sul: '↓ Sul', leste: '→ Leste', oeste: '← Oeste' };
+  let h = `<h2>${r.icone} ${esc(r.nome)} ${r.neblina ? '<span class="est">🌫️ NÉVOA</span>' : ''}${!r.luz ? '<span class="est">sem luz</span>' : ''}${r.fogueira ? '<span class="est bom">🔥 fogueira</span>' : ''}${r.abrigo ? '<span class="est bom">⛺ abrigo</span>' : ''}</h2><div class="peq">🌡️ ${r.temp}°C (manhã) · mais frio à noite${v.voce.temp != null ? ' · agora sente ' + v.voce.temp + '°C' : ''}</div>`;
+  if (dead) h += '<p class="dica">Você não está mais no mundo.</p>';
+  h += '<h3>Locais</h3>' + (r.locais.length ? r.locais.map(l => {
+    const cheio = l.cmdVasculhados >= l.cmdTotal;
+    return `<div class="linha"><div class="nm">${l.icone} ${esc(l.nome)}<small>${l.cmdVasculhados}/${l.cmdTotal} cômodos já vasculhados${v.voce.local === l.id ? ' · você está aqui' : ''}</small></div>
+      <div class="btns">${dead ? '' : l.trancado ? `<span class="est">🔒 trancado</span><button class="mini" data-a="arrombar" data-l="${esc(l.id)}">Arrombar</button>` : `<button class="mini" data-a="vasculhar" data-l="${esc(l.id)}">Vasculhar</button><button class="mini" data-a="vasculhar_fundo" data-l="${esc(l.id)}">A fundo</button><button class="mini" data-a="ir" data-l="${esc(l.id)}">Ir</button>`}</div></div>`; }).join('') : '<p class="dica">Só terreno aberto.</p>');
+  if (r.armadilhas.length) h += '<h3>Suas armadilhas aqui</h3>' + r.armadilhas.map(x => `<div class="peq">🪤 ${esc(x.item)}${x.presa ? ' — <b style="color:var(--verde)">' + x.presa + ' presa(s)!</b>' : ''}</div>`).join('');
+  if (r.chao.length) h += '<h3>No chão</h3>' + r.chao.map(c => `<div class="linha"><div class="nm">${esc(c.nome)} <b>x${c.qtd}</b></div><div class="btns">${dead ? '' : `<button class="mini" data-pg="${esc(c.id)}">Pegar</button>`}</div></div>`).join('');
+  h += '<h3>Quem está aqui</h3>' + (v.presentes.length ? v.presentes.map(o => `<div class="linha"><div class="nm">${esc(o.nome)}${o.aliado ? ' <span class="tag">aliado</span>' : ''}${o.tregua ? ' <span class="tag">trégua</span>' : ''}</div>
+      <div class="btns">${dead ? '' : `<button class="mini" data-f="${o.id}">Falar</button><button class="mini" data-d="${o.id}">Dar</button><button class="mini" data-q="tregua" data-id="${o.id}">Trégua</button><button class="mini" data-q="alianca" data-id="${o.id}">Aliança</button><button class="mini" data-x="furtar" data-id="${o.id}">Furtar</button><button class="mini" data-x="atacar" data-id="${o.id}" style="color:var(--vermelho)">Atacar</button>`}</div></div>`).join('') : '<p class="dica">Ninguém à vista no começo da rodada (pode mudar durante ela).</p>');
+  h += '<h3>Caminhos</h3><div class="btns" style="justify-content:flex-start">' + Object.keys(r.vizinhas).map(d => { const n = r.vizinhas[d]; return `<button class="mini" data-mv="${d}" ${dead ? 'disabled' : ''}>${dirs[d]}: ${n.icone} ${esc(n.nome)}${n.neblina ? ' 🌫️' : ''}</button>`; }).join('') + '</div>';
+  h += dead ? '' : `<div class="btns" style="justify-content:flex-start;margin-top:8px"><button class="mini" data-s="observar">🔭 Observar</button><button class="mini" data-s="esconder">🫥 Esconder-se</button><button class="mini" data-s="coletar_agua">🚰 Pegar água</button><button class="mini" data-s="pescar">🎣 Pescar</button><button class="mini" data-s="cacar">🏹 Caçar</button><button class="mini" data-s="fogueira">🔥 Fogueira</button><button class="mini" data-s="purificar">💧 Purificar</button><button class="mini" data-s="tratar">🩹 Tratar feridas</button><button class="mini" data-s="descansar">🛌 Descansar</button><button class="mini" data-s="construir_abrigo">⛺ Abrigo</button><button class="mini" data-s="barricar">🚪 Barricar</button>${r.armadilhas.some(x => x.presa) ? '<button class="mini" data-s="recolher">🪤 Recolher presas</button>' : ''}<button class="mini" data-dm="2">😴 Dormir 2</button><button class="mini" data-dm="3">😴 Dormir 3</button>${v.voce.podeEscapar ? '<button class="mini" data-s="escapar" style="color:var(--roxo)">✨ Atravessar</button>' : ''}</div>`;
+  const el = $('jRegiao'); el.innerHTML = h;
+  el.querySelectorAll('[data-a]').forEach(b => b.onclick = () => addAcao({ tipo: b.dataset.a, local: b.dataset.l }));
+  el.querySelectorAll('[data-pg]').forEach(b => b.onclick = () => addAcao({ tipo: 'pegar_chao', item: b.dataset.pg }));
+  el.querySelectorAll('[data-f]').forEach(b => b.onclick = () => preencher('falar', { alvo: b.dataset.f }));
+  el.querySelectorAll('[data-d]').forEach(b => b.onclick = () => preencher('dar', { alvo: b.dataset.d }));
+  el.querySelectorAll('[data-q]').forEach(b => b.onclick = () => addAcao({ tipo: 'propor', alvo: b.dataset.id, tipoAcordo: b.dataset.q }));
+  el.querySelectorAll('[data-x]').forEach(b => b.onclick = () => { if (b.dataset.x === 'atacar' && !confirm('Atacar esta pessoa?')) return; addAcao({ tipo: b.dataset.x, alvo: b.dataset.id }); });
+  el.querySelectorAll('[data-mv]').forEach(b => b.onclick = () => addAcao({ tipo: 'mover', dir: b.dataset.mv }));
+  el.querySelectorAll('[data-s]').forEach(b => b.onclick = () => addAcao({ tipo: b.dataset.s }));
+  el.querySelectorAll('[data-dm]').forEach(b => b.onclick = () => addAcao({ tipo: 'dormir', turnos: Number(b.dataset.dm) }));
+}
+const cvJogo = criarMundoCanvas($('jMapaCv'), { onClick: (id) => {
+  if (!E || !E.jogo) return; const me = E.jogo.regiao, dir = Object.keys(me.vizinhas).find(d => me.vizinhas[d].id === id);
+  if (dir && E.jogo.voce.vivo) addAcao({ tipo: 'mover', dir }); } });
+function renderMapa() {
+  const v = J(), m = v.mapa, me = v.regiao;
+  cvJogo.atualizar({ seed: m.seed, N: m.N, regioes: m.regioes, eu: v.voce.vivo && !v.voce.escapou ? me.id : null, vizinhas: Object.values(me.vizinhas).map(x => x.id),
+    aliados: v.voce.aliados, outros: v.presentes.filter(o => !o.aliado).map(o => ({ regiao: me.id, nome: o.nome })), pista: m.pista });
+  $('jMapaDica').textContent = `Névoa: estágio ${m.estagio}/${m.estagioMax}. Clique numa região vizinha (borda azul) para planejar o caminho.` + (m.pista.x != null || m.pista.regiao != null ? ' Faixa/X roxo = pista de mapa que você achou.' : '');
+}
+function renderDiario() {
+  const v = J(), base = (r) => (r - 1) * 3 + 1;
+  const hist = v.historico.slice().reverse();
+  $('jDiario').innerHTML = hist.length ? hist.map((h, idx) => {
+    const corpo = h.entradas.length ? h.entradas.map(e => `<div class="e t-${esc(e.tipo)}"><span class="w">Dia ${e.d} · ${esc(e.per)}</span>${esc(e.texto)}</div>`).join('') : '<div class="e t-sistema">Nada aconteceu (você ficou parado).</div>';
+    return `<details ${idx === 0 ? 'open' : ''}><summary>Rodada ${h.rodada} (dias ${base(h.rodada)}–${base(h.rodada) + 2})</summary>${corpo}</details>`; }).join('') : '<p class="dica">O diário aparece depois da primeira rodada. Planeje e aperte "Terminei o planejamento".</p>';
+}
+function renderPropostas() {
+  const v = J(), el = $('jPropostas');
+  const itens = [];
+  for (const p of v.propostasRecebidas) itens.push(`<div class="prop">🤝 <b>${esc(p.deNome)}</b> propõe ${p.tipo === 'alianca' ? 'uma <b>ALIANÇA</b>' : 'uma <b>TRÉGUA</b>'}.<div class="btns" style="justify-content:flex-start;margin-top:6px"><button class="mini verde" data-pp="${p.id}" data-ac="1">Aceitar</button><button class="mini" data-pp="${p.id}" data-ac="0">Recusar</button></div></div>`);
+  for (const p of v.propostasEnviadas) itens.push(`<div class="peq">⏳ Aguardando ${esc(p.paraNome)} responder à sua proposta de ${p.tipo === 'alianca' ? 'aliança' : 'trégua'}.</div>`);
+  for (const a of v.avisos.slice(-3)) itens.push(`<div class="peq">${esc(a.texto)}</div>`);
+  el.classList.toggle('oculto', !itens.length);
+  el.innerHTML = itens.join('');
+  el.querySelectorAll('[data-pp]').forEach(b => b.onclick = () => socket.emit('proposta', { id: Number(b.dataset.pp), aceitar: b.dataset.ac === '1' }));
+}
+function renderLateral() {
+  const v = J();
+  $('jPublico').innerHTML = v.publico.length ? v.publico.slice().reverse().map(p => `<div class="e t-${esc(p.tipo)}"><span class="w">R${p.rodada}</span>${esc(p.texto)}</div>`).join('') : '<p class="dica">Sem notícias ainda.</p>';
+  $('jJogadores').innerHTML = v.jogadores.map(j => `<div class="linha"><div class="nm">${esc(j.nome)}${j.id === v.voce.id ? ' (você)' : ''}${j.aliado ? ' <span class="tag">aliado</span>' : ''}<small>${esc(j.classeNome || '')}${j.causa ? ' · ' + esc(j.causa) : ''}</small></div><span class="${j.estado === 'vivo' ? 'tag' : 'off'}">${j.estado === 'vivo' ? 'vivo' : j.estado === 'morto' ? '💀 morto' : '🌫️ desaparecido'}</span></div>`).join('');
+  const prontos = E.jogadores.filter(j => j.pronto).length;
+  $('jProntos').textContent = `Prontos: ${prontos}/${E.jogadores.length}`;
+}
+function renderJogo() {
+  const v = J(), me = v.voce;
+  const rodNum = v.fim ? v.rodada : v.rodada + 1;
+  $('jRodada').textContent = v.fim ? `Fim · ${v.rodada} rodadas` : `Rodada ${rodNum} · Dias ${v.diaInicio}–${v.diaInicio + 2}`;
+  const dead = !me.vivo || me.escapou;
+  $('btnPronto').classList.toggle('oculto', dead || v.fim);
+  $('btnPronto').textContent = v.pronto ? '↩ Voltar a editar' : '✔ Terminei o planejamento';
+  $('btnPronto').className = v.pronto ? 'sec' : 'verde';
+  let faixa = '';
+  if (v.fim) {
+    faixa = `<div class="faixa fim"><h2 style="font-size:16px">${esc(v.resultado ? v.resultado.texto : 'Fim de jogo')}</h2>
+      <table class="res"><tr><th>Jogador</th><th>Classe</th><th>Destino</th><th>Abates</th></tr>${(v.resumoFinal || []).map(r => `<tr><td>${esc(r.nome)}</td><td>${esc(r.classe || '')}</td><td>${r.estado === 'morto' ? '💀 ' + esc(r.causa || '') + ' (R' + r.rodadaMorte + ')' : r.estado === 'desaparecido' ? '🌫️ desapareceu' : '🏆 sobreviveu'}</td><td>${r.kills}</td></tr>`).join('')}</table>
+      ${E.voce.host ? '<button class="verde full" id="btnNova">Nova partida (voltar à sala)</button>' : '<p class="dica">O anfitrião pode iniciar outra partida.</p>'}</div>`;
+  } else if (me.escapou) faixa = '<div class="faixa fim">🌌 Você atravessou e sumiu do mundo. Agora observa os que ficaram.</div>';
+  else if (!me.vivo) faixa = `<div class="faixa morto">💀 Você morreu: ${esc(me.causa || '')}. Pode acompanhar a partida e conversar com os outros mortos.</div>`;
+  $('jFaixa').innerHTML = faixa;
+  if ($('btnNova')) $('btnNova').onclick = () => socket.emit('reiniciar');
+  // postura
+  const sel = $('jPostura');
+  if (sel.dataset.pronto !== '1') { sel.innerHTML = Object.keys(v.posturas).map(k => `<option value="${k}">${esc(v.posturas[k])}</option>`).join(''); sel.dataset.pronto = '1'; }
+  sel.value = v.postura; sel.disabled = dead || v.fim;
+  $('jPlano').classList.toggle('oculto', v.fim);
+  renderStatus(); renderInv(); renderCraft(); renderRegiao(); renderMapa(); renderDiario(); renderPropostas(); renderFila(); renderForm(); renderLateral(); renderChats();
+}
+$('nome').addEventListener('keydown', (e) => { if (e.key === 'Enter') $('btnCriar').click(); });
 </script>
 </body>
 </html>

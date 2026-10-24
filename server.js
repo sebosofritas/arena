@@ -1,162 +1,116 @@
-// ============================================================
-//  ARENA DE SOBREVIVÊNCIA - servidor (versão 0.1: lobby)
-//  Aqui fica a "verdade" do jogo. O navegador só mostra o que
-//  o servidor manda.
-// ============================================================
-const express = require('express');
+'use strict';
+// Servidor: entrega a página e liga os botões da tela à Sala.
+const path = require('path');
 const http = require('http');
-const crypto = require('crypto');
+const express = require('express');
 const { Server } = require('socket.io');
+const { Sala, codigoAleatorio } = require('./jogo/sala');
+const Persist = require('./jogo/persistencia');
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server);
+const servidor = http.createServer(app);
+const io = new Server(servidor, { maxHttpBufferSize: 1e5 });
 
-app.use(express.static(__dirname + '/public'));
-app.get('/saude', (req, res) => res.send('ok')); // usado para "acordar" o servidor
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/saude', (req, res) => res.send('ok'));
 
-// ---------- CONFIGURAÇÕES (fáceis de mudar depois) ----------
-const MAX_JOGADORES = 24;       // limite técnico por sala
-const TAMANHO_NOME = 16;        // letras máximas no nome
-const SALA_VAZIA_EXPIRA_MS = 60 * 60 * 1000; // sala sem ninguém some após 1h
 
-// ---------- ESTADO ----------
-// salas: código -> { codigo, fase, jogadores: [..], hostToken, criadaEm }
-const salas = new Map();
+const salas = new Map();           // código -> Sala
+const MAX_SALAS = 200;
 
-function gerarCodigo() {
-  const letras = 'ABCDEFGHJKLMNPQRSTUVWXYZ'; // sem I e O (confundem com 1 e 0)
-  let codigo;
-  do {
-    codigo = Array.from({ length: 4 }, () => letras[Math.floor(Math.random() * letras.length)]).join('');
-  } while (salas.has(codigo));
-  return codigo;
+// Salvamento: grava 2 s depois da última mudança (e a cada fim de rodada, que também muda o estado)
+const pendentes = new Map();
+function agendarSalvar(sala) {
+  if (pendentes.has(sala.codigo)) return;
+  pendentes.set(sala.codigo, setTimeout(() => { pendentes.delete(sala.codigo); if (salas.get(sala.codigo) === sala) Persist.salvar(sala); }, 2000));
+}
+function aoCriar(s) { s.aoMudar = agendarSalvar; return s; }
+for (const d of Persist.carregarTodas()) {
+  try { const s = aoCriar(Sala.importar(d)); salas.set(s.codigo, s); console.log('Sala restaurada:', s.codigo, s.fase); }
+  catch (e) { console.error('Não consegui restaurar uma sala:', e.message); }
+}
+function salvarTudo() { for (const s of salas.values()) Persist.salvar(s); }
+process.on('SIGTERM', () => { salvarTudo(); process.exit(0); });
+process.on('SIGINT', () => { salvarTudo(); process.exit(0); });
+
+function novaSala() {
+  if (salas.size >= MAX_SALAS) return null;
+  let c; do { c = codigoAleatorio(); } while (salas.has(c));
+  const s = aoCriar(new Sala(c));
+  salas.set(c, s);
+  return s;
 }
 
-function limparNome(nome) {
-  return String(nome || '').replace(/\s+/g, ' ').trim().slice(0, TAMANHO_NOME);
-}
-
-// O que o navegador pode ver (nunca manda o token dos outros!)
-function estadoPublico(sala) {
-  return {
-    codigo: sala.codigo,
-    fase: sala.fase, // 'lobby' ou 'jogo'
-    max: MAX_JOGADORES,
-    jogadores: sala.jogadores.map(j => ({
-      nome: j.nome,
-      conectado: j.conectado,
-      host: j.token === sala.hostToken
-    }))
-  };
-}
-
-function enviarSala(sala) {
-  for (const j of sala.jogadores) {
-    if (j.socketId) {
-      io.to(j.socketId).emit('sala', {
-        ...estadoPublico(sala),
-        voce: { nome: j.nome, token: j.token, eHost: j.token === sala.hostToken }
-      });
-    }
+// Limpeza: salas sem ninguém conectado há mais de 40 min, ou com mais de 12 h
+setInterval(() => {
+  const agora = Date.now();
+  for (const [c, s] of salas) {
+    if ((s.vazia() && agora - s.ultima > 40 * 60 * 1000) || agora - s.criada > 12 * 3600 * 1000) { s.encerrar(); salas.delete(c); Persist.apagar(c); }
   }
-}
+}, 5 * 60 * 1000).unref();
 
-function novoJogador(sala, nome, socket) {
-  const jogador = {
-    token: crypto.randomBytes(12).toString('hex'),
-    nome,
-    socketId: socket.id,
-    conectado: true
-  };
-  sala.jogadores.push(jogador);
-  socket.data.codigo = sala.codigo;
-  socket.data.token = jogador.token;
-  return jogador;
-}
-
-// ---------- CONEXÕES ----------
 io.on('connection', (socket) => {
+  let sala = null, pid = null, ultimoEvento = 0, rajada = 0;
 
-  socket.on('criarSala', ({ nome }) => {
-    nome = limparNome(nome);
-    if (!nome) return socket.emit('erro', 'Escolha um nome para o seu personagem.');
-    const codigo = gerarCodigo();
-    const sala = { codigo, fase: 'lobby', jogadores: [], hostToken: null, criadaEm: Date.now() };
-    salas.set(codigo, sala);
-    const jogador = novoJogador(sala, nome, socket);
-    sala.hostToken = jogador.token;
-    enviarSala(sala);
-  });
+  const enviar = (ev, d) => socket.emit(ev, d);
+  const erro = (m) => socket.emit('erro', m);
+  const usar = (fn) => (...args) => {
+    // limite simples de velocidade
+    const agora = Date.now();
+    if (agora - ultimoEvento > 1000) { rajada = 0; ultimoEvento = agora; }
+    if (++rajada > 25) return erro('Calma! Muitas ações seguidas.');
+    try { fn(...args); } catch (e) { console.error('Erro no evento:', e); erro('Erro interno. Tente de novo.'); }
+  };
+  const exigeSala = () => { if (!sala || !pid) { erro('Você não está em uma sala.'); return false; } return true; };
+  const resposta = (r) => { if (r && r.erro) erro(r.erro); return r; };
+  const ligar = (s, j) => { sala = s; pid = j.id; socket.join(s.codigo); s.difundir(); };
 
-  socket.on('entrarSala', ({ codigo, nome }) => {
-    codigo = String(codigo || '').toUpperCase().trim();
-    nome = limparNome(nome);
-    const sala = salas.get(codigo);
-    if (!nome) return socket.emit('erro', 'Escolha um nome para o seu personagem.');
-    if (!sala) return socket.emit('erro', 'Não existe sala com esse código.');
-    if (sala.fase !== 'lobby') return socket.emit('erro', 'A partida dessa sala já começou.');
-    if (sala.jogadores.length >= MAX_JOGADORES) return socket.emit('erro', 'A sala está cheia.');
-    if (sala.jogadores.some(j => j.nome.toLowerCase() === nome.toLowerCase())) {
-      return socket.emit('erro', 'Já existe um personagem com esse nome na sala.');
-    }
-    novoJogador(sala, nome, socket);
-    enviarSala(sala);
-  });
-
-  // Voltar para o mesmo personagem (aba fechada, wifi caiu, etc.)
-  socket.on('reconectar', ({ codigo, token }) => {
-    const sala = salas.get(String(codigo || '').toUpperCase());
-    const jogador = sala && sala.jogadores.find(j => j.token === token);
-    if (!jogador) return socket.emit('reconexaoFalhou');
-    jogador.socketId = socket.id;
-    jogador.conectado = true;
-    socket.data.codigo = sala.codigo;
-    socket.data.token = jogador.token;
-    enviarSala(sala);
-  });
-
-  socket.on('iniciarPartida', () => {
-    const sala = salas.get(socket.data.codigo);
-    if (!sala || sala.hostToken !== socket.data.token) return;
-    if (sala.fase !== 'lobby') return;
-    if (sala.jogadores.length < 2) return socket.emit('erro', 'Precisa de pelo menos 2 jogadores.');
-    sala.fase = 'jogo';
-    enviarSala(sala);
-    // >>> AQUI entrará o motor do jogo (períodos, ações, combate...) <<<
-  });
-
-  socket.on('sairSala', () => {
-    const sala = salas.get(socket.data.codigo);
-    if (!sala) return;
-    if (sala.fase === 'lobby') {
-      sala.jogadores = sala.jogadores.filter(j => j.token !== socket.data.token);
-      if (sala.hostToken === socket.data.token && sala.jogadores.length) {
-        sala.hostToken = sala.jogadores[0].token; // passa o comando para o próximo
-      }
-    }
+  socket.on('criarSala', usar((d) => {
+    if (sala) return erro('Você já está numa sala.');
+    const s = novaSala(); if (!s) return erro('Servidor cheio, tente em alguns minutos.');
+    const r = s.entrar(d && d.nome, enviar);
+    if (r.erro) { salas.delete(s.codigo); return erro(r.erro); }
+    ligar(s, r.jogador);
+  }));
+  socket.on('entrarSala', usar((d) => {
+    if (sala) return erro('Você já está numa sala.');
+    const c = String((d && d.codigo) || '').trim().toUpperCase();
+    const s = salas.get(c); if (!s) return erro('Sala não encontrada. Confira o código.');
+    const r = s.entrar(d && d.nome, enviar);
+    if (r.erro) return erro(r.erro);
+    ligar(s, r.jogador);
+  }));
+  socket.on('reconectar', usar((d) => {
+    if (sala) return;
+    const s = salas.get(String((d && d.codigo) || '').toUpperCase());
+    if (!s) return socket.emit('reconexaoFalhou');
+    const r = s.reconectar(d && d.token, enviar);
+    if (r.erro) return socket.emit('reconexaoFalhou');
+    ligar(s, r.jogador);
+  }));
+  socket.on('sairSala', usar(() => {
+    if (!exigeSala()) return;
+    const s = sala, id = pid; sala = null; pid = null; socket.leave(s.codigo);
+    s.sair(id);
+    if (s.jogadores.size === 0) { s.encerrar(); salas.delete(s.codigo); Persist.apagar(s.codigo); }
     socket.emit('saiu');
-    socket.data.codigo = null;
-    enviarSala(sala);
-  });
+  }));
+  socket.on('configurar', usar((d) => { if (exigeSala()) resposta(sala.configurar(pid, d)); }));
+  socket.on('iniciar', usar(() => { if (exigeSala()) resposta(sala.iniciar(pid)); }));
+  socket.on('criar:atualizar', usar((d) => { if (exigeSala()) resposta(sala.criarAtualizar(pid, d)); }));
+  socket.on('criar:rolar', usar(() => { if (exigeSala()) resposta(sala.criarRolar(pid)); }));
+  socket.on('criar:pronto', usar((v) => { if (exigeSala()) resposta(sala.criarPronto(pid, v)); }));
+  socket.on('fila', usar((d) => { if (exigeSala()) resposta(sala.definirFila(pid, d && d.fila, d && d.postura)); }));
+  socket.on('postura', usar((p) => { if (exigeSala()) resposta(sala.definirPostura(pid, p)); }));
+  socket.on('pronto', usar((v) => { if (exigeSala()) resposta(sala.pronto(pid, v)); }));
+  socket.on('proposta', usar((d) => { if (exigeSala()) resposta(sala.responderProposta(pid, d && d.id, d && d.aceitar)); }));
+  socket.on('chat', usar((t) => { if (exigeSala()) resposta(sala.chat(pid, t)); }));
+  socket.on('reiniciar', usar(() => { if (exigeSala()) resposta(sala.reiniciar(pid)); }));
 
   socket.on('disconnect', () => {
-    const sala = salas.get(socket.data.codigo);
-    if (!sala) return;
-    const jogador = sala.jogadores.find(j => j.token === socket.data.token);
-    if (jogador) { jogador.conectado = false; jogador.socketId = null; }
-    enviarSala(sala);
+    if (sala && pid) sala.desconectar(pid);
   });
 });
 
-// Limpeza de salas abandonadas
-setInterval(() => {
-  const agora = Date.now();
-  for (const [codigo, sala] of salas) {
-    const ninguemOnline = sala.jogadores.every(j => !j.conectado);
-    if (ninguemOnline && agora - sala.criadaEm > SALA_VAZIA_EXPIRA_MS) salas.delete(codigo);
-  }
-}, 10 * 60 * 1000);
-
 const PORTA = process.env.PORT || 3000;
-server.listen(PORTA, () => console.log('Arena rodando na porta ' + PORTA));
+servidor.listen(PORTA, () => console.log('Arena rodando na porta ' + PORTA));
