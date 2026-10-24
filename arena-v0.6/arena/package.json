@@ -1,0 +1,17 @@
+{
+  "name": "arena-sobrevivencia",
+  "version": "0.6.0",
+  "description": "Battle royale de sobrevivência multiplayer entre amigos",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node teste-dados.js && node teste-motor.js 20 esperto && node teste-sala.js && node teste-extras.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "socket.io": "^4.7.5"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
